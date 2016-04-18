@@ -133,28 +133,24 @@ uint64_t sa(uint64_t array[])
 
 unsigned int binary(uint64_t value, uint64_t array[], unsigned int lower, unsigned int upper)
 {
-    // calculate the middle value
+    // calculate mid
     unsigned int mid = lower + ((upper - lower) / 2);
     
-    // if you've searched the entire list, you're done!
+    // are we done?
     if (mid == upper)
     {
     	return mid;
     }
-
-    // if the middle value is the correct value, you're done!
     if (array[mid] <= value && array[mid + 1] > value)
     {
         return mid;
     }
     
-    // if the middle value is too high, narrow search to the left
+    // we're not done
     if (array[mid] > value)
     {
         return binary(value, array, lower, mid - 1);
     }
-    
-    // if the middle value is too low, narrow search to the right
     else
     {
         return binary(value, array, mid + 1, upper);
@@ -164,7 +160,7 @@ unsigned int binary(uint64_t value, uint64_t array[], unsigned int lower, unsign
 // from c++reference
 int compare(const void * a, const void * b)
 {
-  	return ( *(int*)b - *(int*)a );
+  	return ((*(uint64_t*)b - *(uint64_t*)a > 0) ? (int) 1 : (int) -1);
 }
 
 // from http://stackoverflow.com/questions/7920860/
