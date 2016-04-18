@@ -34,7 +34,7 @@ int main(int argc, char * argv[])
 
 	if (argc == 2)
 	{
-		uint64_t* arr = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+		arr = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
 		
 		printf("Inputfile given! Reading in... \n");
 
@@ -55,6 +55,11 @@ int main(int argc, char * argv[])
 			arr[i] = atoi(line);
 			i++;
 		}
+		printf("Karmarkar-Karp: %llu\n", kk(arr));
+		printf("Repeated random: %llu\n", rrandom(arr));
+		printf("Hill-climbing: %llu\n", hc(arr));
+		printf("Simulated annealing: %llu\n", sa(arr));
+		free(arr);
 
 		fclose(file);
 	}
@@ -69,6 +74,11 @@ int main(int argc, char * argv[])
 
 		arr = randArray();
 
+		printf("Karmarkar-Karp: %llu\n", kk(arr));
+		printf("Repeated random: %llu\n", rrandom(arr));
+		printf("Hill-climbing: %llu\n", hc(arr));
+		printf("Simulated annealing: %llu\n", sa(arr));
+		free(arr);
 	}
 	else
 	{
