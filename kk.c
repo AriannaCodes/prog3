@@ -10,7 +10,7 @@
 
 #define ITERS 25000
 #define SIZE 100
-#define MAX 100000
+#define MAX 1000000000000
 
 uint64_t gen();
 uint64_t* randArray();
@@ -77,6 +77,7 @@ int main(int argc, char * argv[])
 
 		printf("Karmarkar-Karp: %llu\n", kk(arr));
 		printf("Repeated random: %llu\n", rrandom(arr));
+		printf("Hill-climbing: %llu\n", hc(arr));
 	}
 	else
 	{
@@ -84,7 +85,6 @@ int main(int argc, char * argv[])
 		return 0;
 	}
 
-	printf("Hill-climbing: %llu\n", hc(arr));
 	printf("Simulated annealing: %llu\n", sa(arr));
 }
 
@@ -182,15 +182,6 @@ uint64_t hc(uint64_t array[])
 	// array to store what's in set
 	bool set[SIZE];
 
-	printf("hi\n");
-	printf("hello %i\n", array[0]);
-	// print out array
-	for (int i = 0; i < SIZE; i++)
-	{
-		printf("%llu, \n", array[i]);
-	}
-	printf("bye\n");
-
 	// randomly assign every element of the array
 	for (int i = 0; i < SIZE; i++)
 	{
@@ -206,15 +197,12 @@ uint64_t hc(uint64_t array[])
 		}
 	}
 
-	printf("HI3\n");
-
 	min = sum;
 	abs_min = abs_sum;
 
 	// iterate through neighbours
 	for (unsigned int i = 0; i < ITERS; ++i)
 	{
-		printf("HI\n");
 		// randomly gen two places
 		int a = rand() % 100;
 		int b = rand() % 100;
