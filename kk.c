@@ -56,9 +56,6 @@ int main(int argc, char * argv[])
 			i++;
 		}
 		printf("Karmarkar-Karp: %llu\n", kk(arr));
-		printf("Repeated random: %llu\n", rrandom(arr));
-		printf("Hill-climbing: %llu\n", hc(arr));
-		printf("Simulated annealing: %llu\n", sa(arr));
 		free(arr);
 
 		fclose(file);
