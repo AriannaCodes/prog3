@@ -3,12 +3,26 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define ITERS 25000
 #define SIZE 100
 
+// from http://stackoverflow.com/questions/7920860/how-to-generate-large-random-numbers-c
+uint64_t gen() 
+{
+	uint64_t num;
+	num = rand();
+	return ((num << 32) + rand()) % 1000000000000;
+}
+
 int main(int argc, char * argv[])
 {
+	// seed random number generator
+	time_t t;
+	t = time(NULL);
+	srand((unsigned) time(&t));
+
 	if (argc == 2) // inputfile given
 	{
 		// read the inputfile
@@ -30,12 +44,12 @@ int main(int argc, char * argv[])
 // Karmarkar-Karp
 unsigned int kk(uint64_t array[])
 {
-	uint64_t diffArray[SIZE] = malloc(SIZE * sizeof(uint64_t));
+	uint64_t * diffArray = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
 	return 0;
 }
 
 // Repeated random
-unsigned int random(uint64_t array[])
+unsigned int rrandom(uint64_t array[])
 {
 	for (unsigned int i = 0; i < ITERS; ++i)
 	{
