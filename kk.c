@@ -8,15 +8,15 @@
 #include <time.h>
 
 #define ITERS 25000
-#define SIZE 100
+#define SIZE 5
 #define MAX 1000000000000
 
 uint64_t gen();
 uint64_t* randArray();
-unsigned int kk(uint64_t array[]);
-unsigned int rrandom(uint64_t array[]);
-unsigned int hc(uint64_t array[]);
-unsigned int sa(uint64_t array[]);
+uint64_t kk(uint64_t array[]);
+uint64_t rrandom(uint64_t array[]);
+uint64_t hc(uint64_t array[]);
+uint64_t sa(uint64_t array[]);
 int compare(const void * a, const void * b);
 
 // from c++reference
@@ -48,7 +48,7 @@ uint64_t* randArray()
 int main(int argc, char * argv[])
 {
 	// seed random number generator
-	time_t t;
+	/*time_t t;
 	t = time(NULL);
 	srand((unsigned) time(&t));
 
@@ -69,11 +69,13 @@ int main(int argc, char * argv[])
 	else
 	{
 		printf("Invalid input\n");
-	}
+	}*/
+	uint64_t array[] = {10, 8, 7, 6, 5};
+	printf("%llu\n", rrandom(array));
 }
 
 // Karmarkar-Karp
-unsigned int kk(uint64_t array[])
+uint64_t kk(uint64_t array[])
 {
 	// sort in reverse order
 	uint64_t * diffArray = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
@@ -100,7 +102,7 @@ unsigned int kk(uint64_t array[])
 }
 
 // Repeated random
-unsigned int rrandom(uint64_t array[])
+uint64_t rrandom(uint64_t array[])
 {
 	uint64_t min = MAX;
 	for (unsigned int i = 0; i < ITERS; ++i)
@@ -127,7 +129,7 @@ unsigned int rrandom(uint64_t array[])
 }
 
 // Hill-climbing
-unsigned int hc(uint64_t array[])
+uint64_t hc(uint64_t array[])
 {
 	for (unsigned int i = 0; i < ITERS; ++i)
 	{
@@ -137,7 +139,7 @@ unsigned int hc(uint64_t array[])
 }
 
 // Simulated annealing
-unsigned int sa(uint64_t array[])
+uint64_t sa(uint64_t array[])
 {
 	for (unsigned int i = 0; i < ITERS; ++i)
 	{
