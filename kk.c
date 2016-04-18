@@ -1,8 +1,12 @@
 // kk.c
 
+#include <stdint.h>
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
+#include <time.h>
+
+#define ITERS 25000
+#define SIZE 100
 
 // from http://stackoverflow.com/questions/7920860/how-to-generate-large-random-numbers-c
 uint64_t gen() 
@@ -25,11 +29,10 @@ int main(int argc, char * argv[])
 		// run kk
 		printf("Inputfile given\n");
 	}
-	else if (argc == 1)
+	else if (argc == 1) // no inputfile given; run comparisons
 	{
 		// generate 50 random instances of size 100
-		// find kk
-		// run the other algorithms at least 25k times
+		// run all of the algorithms on each instance
 		printf("No inputfile given\n");
 	}
 	else
@@ -39,25 +42,38 @@ int main(int argc, char * argv[])
 }
 
 // Karmarkar-Karp
-unsigned int kk()
+unsigned int kk(uint64_t array[])
 {
+	uint64_t * diffArray = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
 	return 0;
 }
 
 // Repeated random
-unsigned int rrandom()
+unsigned int rrandom(uint64_t array[])
 {
+	for (unsigned int i = 0; i < ITERS; ++i)
+	{
+
+	}
 	return 0;
 }
 
 // Hill-climbing
-unsigned int hc()
+unsigned int hc(uint64_t array[])
 {
+	for (unsigned int i = 0; i < ITERS; ++i)
+	{
+		
+	}
 	return 0;
 }
 
 // Simulated annealing
-unsigned int sa()
+unsigned int sa(uint64_t array[])
 {
+	for (unsigned int i = 0; i < ITERS; ++i)
+	{
+		
+	}
 	return 0;
 }
