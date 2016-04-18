@@ -7,13 +7,14 @@
 
 #define ITERS 25000
 #define SIZE 100
+#define MAX 1000000000000
 
 // from http://stackoverflow.com/questions/7920860/how-to-generate-large-random-numbers-c
 uint64_t gen() 
 {
 	uint64_t num;
 	num = rand();
-	return ((num << 32) + rand()) % 1000000000000;
+	return ((num << 32) + rand()) % MAX;
 }
 
 int main(int argc, char * argv[])
