@@ -9,6 +9,7 @@
 
 #define ITERS 25000
 #define SIZE 100
+#define MAX 1000000000000
 
 // from c++reference
 int compare (const void * a, const void * b)
@@ -21,7 +22,7 @@ uint64_t gen()
 {
 	uint64_t num;
 	num = rand();
-	return ((num << 32) + rand()) % 1000000000000;
+	return ((num << 32) + rand()) % MAX;
 }
 
 int main(int argc, char * argv[])

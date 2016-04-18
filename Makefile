@@ -1,2 +1,2 @@
 all:
-	clang kk.c -o a.out
+	clang kk.c -o kk
