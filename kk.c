@@ -108,7 +108,7 @@ uint64_t kk(uint64_t array[])
 		if (diffArray[1] == 0)  break;
 		diffArray[0] -= diffArray[1];
 		diffArray[1] = 0;
-		// qsort(diffArray, SIZE, sizeof(uint64_t), uComp0);
+		
 		// binary search
 		if (diffArray[0] < diffArray[2])
 		{
