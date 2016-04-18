@@ -9,12 +9,30 @@
 #define SIZE 100
 #define MAX 1000000000000
 
+uint64_t gen();
+uint64_t* randArray();
+unsigned int kk(uint64_t array[]);
+unsigned int rrandom(uint64_t array[]);
+unsigned int hc(uint64_t array[]);
+unsigned int sa(uint64_t array[]);
+
 // from http://stackoverflow.com/questions/7920860/how-to-generate-large-random-numbers-c
 uint64_t gen() 
 {
 	uint64_t num;
 	num = rand();
 	return ((num << 32) + rand()) % MAX;
+}
+
+// generate a random array of SIZE 
+uint64_t* randArray()
+{
+	uint64_t* arr = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+	for (int i = 0; i < SIZE; i++)
+	{
+		arr[i] = gen();
+	}
+	return arr;
 }
 
 int main(int argc, char * argv[])
@@ -32,9 +50,11 @@ int main(int argc, char * argv[])
 	}
 	else if (argc == 1) // no inputfile given; run comparisons
 	{
-		// generate 50 random instances of size 100
-		// run all of the algorithms on each instance
-		printf("No inputfile given\n");
+		printf("No inputfile given! Constructing random array...\n");
+		uint64_t* arr = randArray();
+		printf("Repeated random: %i\n", rrandom(arr));
+		printf("Hill-climbing: %i\n", hc(arr));
+		printf("Simulated annealing: %i\n", sa(arr));
 	}
 	else
 	{
@@ -52,11 +72,28 @@ unsigned int kk(uint64_t array[])
 // Repeated random
 unsigned int rrandom(uint64_t array[])
 {
+	uint64_t min = MAX;
 	for (unsigned int i = 0; i < ITERS; ++i)
 	{
-
+		uint64_t sum = 0;
+		// randomly assign every element of the array
+		for (int i = 0; i < 100; i++)
+		{
+			if (rand() % 2 == 1)
+			{
+				sum += array[i];
+			}
+			else
+			{
+				sum -= array[i];
+			}
+		}
+		if (sum < min)
+		{
+			min = sum;
+		}
 	}
-	return 0;
+	return min;
 }
 
 // Hill-climbing
