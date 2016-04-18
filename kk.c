@@ -18,32 +18,7 @@ uint64_t rrandom(uint64_t array[]);
 uint64_t hc(uint64_t array[]);
 uint64_t sa(uint64_t array[]);
 int compare(const void * a, const void * b);
-
-// from c++reference
-int compare(const void * a, const void * b)
-{
-  	return ( *(int*)b - *(int*)a );
-}
-
-// from http://stackoverflow.com/questions/7920860/
-// how-to-generate-large-random-numbers-c
-uint64_t gen() 
-{
-	uint64_t num;
-	num = rand();
-	return ((num << 32) + rand()) % MAX;
-}
-
-// generate a random array of SIZE 
-uint64_t* randArray()
-{
-	uint64_t* arr = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
-	for (int i = 0; i < SIZE; i++)
-	{
-		arr[i] = gen();
-	}
-	return arr;
-}
+unsigned int binary(uint64_t value, uint64_t array[], unsigned int lower, unsigned int upper);
 
 int main(int argc, char * argv[])
 {
@@ -64,9 +39,9 @@ int main(int argc, char * argv[])
 		uint64_t* arr = randArray();
 
 		// run algorithms
-		printf("Repeated random: %i\n", rrandom(arr));
-		printf("Hill-climbing: %i\n", hc(arr));
-		printf("Simulated annealing: %i\n", sa(arr));
+		printf("Repeated random: %llu\n", rrandom(arr));
+		printf("Hill-climbing: %llu\n", hc(arr));
+		printf("Simulated annealing: %llu\n", sa(arr));
 	}
 	else
 	{
@@ -85,10 +60,22 @@ uint64_t kk(uint64_t array[])
 	// recursively find differences
 	while (true)
 	{
-		qsort(diffArray, SIZE, sizeof(uint64_t), compare);
 		if (diffArray[1] == 0)  break;
 		diffArray[0] -= diffArray[1];
 		diffArray[1] = 0;
+		// binary search
+		unsigned int index_before = binary(diffArray[0], diffArray, 1, SIZE);
+		
+		// shift over
+		uint64_t temp = diffArray[0];
+		for (unsigned int i = 2; i <= index_before; ++i)
+		{
+			diffArray[i - 2] = diffArray[i];
+		}
+
+		// insert
+		diffArray[index_before - 1] = temp;
+		diffArray[index_before] = 0;
 	}
 
 	// return best
@@ -142,4 +129,60 @@ uint64_t sa(uint64_t array[])
 		
 	}
 	return 0;
+}
+
+unsigned int binary(uint64_t value, uint64_t array[], unsigned int lower, unsigned int upper)
+{
+    // calculate the middle value
+    unsigned int mid = lower + ((upper - lower) / 2);
+    
+    // if you've searched the entire list, you're done!
+    if (mid == upper)
+    {
+    	return mid;
+    }
+
+    // if the middle value is the correct value, you're done!
+    if (array[mid] <= value && array[mid + 1] > value)
+    {
+        return mid;
+    }
+    
+    // if the middle value is too high, narrow search to the left
+    if (array[mid] > value)
+    {
+        return binary(value, array, lower, mid - 1);
+    }
+    
+    // if the middle value is too low, narrow search to the right
+    else
+    {
+        return binary(value, array, mid + 1, upper);
+    }
+}
+
+// from c++reference
+int compare(const void * a, const void * b)
+{
+  	return ( *(int*)b - *(int*)a );
+}
+
+// from http://stackoverflow.com/questions/7920860/
+// how-to-generate-large-random-numbers-c
+uint64_t gen() 
+{
+	uint64_t num;
+	num = rand();
+	return ((num << 32) + rand()) % MAX;
+}
+
+// generate a random array of SIZE 
+uint64_t* randArray()
+{
+	uint64_t* arr = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+	for (int i = 0; i < SIZE; i++)
+	{
+		arr[i] = gen();
+	}
+	return arr;
 }
