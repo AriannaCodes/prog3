@@ -10,7 +10,7 @@
 
 #define ITERS 25000
 #define SIZE 100
-#define MAX 1000000000000
+#define MAX 100000
 
 uint64_t gen();
 uint64_t* randArray();
@@ -174,11 +174,74 @@ uint64_t rrandom(uint64_t array[])
 // Hill-climbing
 uint64_t hc(uint64_t array[])
 {
+	uint64_t min = INT64_MAX;
+	int64_t abs_min = INT64_MAX;
+	int64_t sum = 0;
+	uint64_t abs_sum = 0;
+
+	// array to store what's in set
+	bool set[SIZE];
+
+	printf("hi\n");
+	// print out array
+	for (int i = 0; i < SIZE; i++)
+	{
+		printf("%llu, \n", array[i]);
+	}
+	printf("bye\n");
+
+	// randomly assign every element of the array
+	for (int i = 0; i < SIZE; i++)
+	{
+		if (rand() % 2 == 0)
+		{
+			sum = sum + array[i];
+			set[i] = true;
+		}
+		else
+		{
+			sum = sum - array[i];
+			set[i] = false;
+		}
+	}
+
+	printf("HI3\n");
+
+	min = sum;
+	abs_min = abs_sum;
+
+	// iterate through neighbours
 	for (unsigned int i = 0; i < ITERS; ++i)
 	{
-		
+		printf("HI\n");
+		// randomly gen two places
+		int a = rand() % 100;
+		int b = rand() % 100;
+
+		// swap (with prob 1/2)
+		sum = min;
+		if (rand() % 2 == 0)
+		{
+			set[a] = !set[a];
+			sum = (set[a]) ? (sum + 2*array[a]) : (sum - 2*array[a]);
+		}
+		if (rand() % 2 == 0)
+		{
+			set[b] = !set[b];
+			sum = (set[b]) ? (sum + 2*array[b]) : (sum - 2*array[b]);
+		}
+
+		// get our new absolute sum
+		abs_sum = llabs(sum);
+
+		// see if we got better
+		if (abs_sum < abs_min)
+		{
+			min = sum;
+			abs_min = abs_sum;
+		}
 	}
-	return 0;
+	return min;
 }
 
 // Simulated annealing
