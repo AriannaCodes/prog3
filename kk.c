@@ -196,7 +196,7 @@ uint64_t hc(uint64_t array[])
 		int a = rand() % 100;
 		int b = rand() % 100;
 
-		// swap (with prob 1/2) !!!
+		// swap (with prob 1/2)
 		sum = min;
 		if (rand() % 2 == 0)
 		{
