@@ -10,14 +10,14 @@
 
 #define ITERS 25000
 #define SIZE 100
-#define MAX 100000
+#define MAX 1000000000000
 
 uint64_t gen();
 uint64_t* randArray();
-uint64_t kk(uint64_t array[]);
-uint64_t rrandom(uint64_t array[]);
-uint64_t hc(uint64_t array[]);
-uint64_t sa(uint64_t array[]);
+uint64_t kk(const uint64_t array[]);
+uint64_t rrandom(const uint64_t array[]);
+uint64_t hc(const uint64_t array[]);
+uint64_t sa(const uint64_t array[]);
 int compare(void const*a, void const*b);
 unsigned int binary(uint64_t value, uint64_t array[], unsigned int lower, unsigned int upper);
 bool sorted(uint64_t * array);
@@ -77,19 +77,19 @@ int main(int argc, char * argv[])
 
 		printf("Karmarkar-Karp: %llu\n", kk(arr));
 		printf("Repeated random: %llu\n", rrandom(arr));
+		printf("Hill-climbing: %llu\n", hc(arr));
+		printf("Simulated annealing: %llu\n", sa(arr));
+		free(arr);
 	}
 	else
 	{
 		printf("Invalid input\n");
 		return 0;
 	}
-
-	printf("Hill-climbing: %llu\n", hc(arr));
-	printf("Simulated annealing: %llu\n", sa(arr));
 }
 
 // Karmarkar-Karp
-uint64_t kk(uint64_t array[])
+uint64_t kk(const uint64_t array[])
 {
 	// sort in reverse order
 	uint64_t * diffArray = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
@@ -99,12 +99,6 @@ uint64_t kk(uint64_t array[])
 	// recursively find differences
 	while (true)
 	{
-		assert(sorted(diffArray));
-		for (unsigned int i = 0; i < 5; ++i)
-		{
-			printf("%llu  ", diffArray[i]);
-		}
-		printf("\n");
 		if (diffArray[1] == 0)  break;
 		diffArray[0] -= diffArray[1];
 		diffArray[1] = 0;
@@ -113,7 +107,6 @@ uint64_t kk(uint64_t array[])
 		if (diffArray[0] < diffArray[2])
 		{
 			unsigned int index_before = binary(diffArray[0], diffArray, 2, SIZE - 1);
-			printf("%d\n", index_before);
 			// shift over
 			uint64_t temp = diffArray[0];
 			for (unsigned int i = 2; i <= index_before; ++i)
@@ -144,7 +137,7 @@ uint64_t kk(uint64_t array[])
 }
 
 // Repeated random
-uint64_t rrandom(uint64_t array[])
+uint64_t rrandom(const uint64_t array[])
 {
 	uint64_t min = UINT64_MAX;
 	for (unsigned int i = 0; i < ITERS; ++i)
@@ -172,8 +165,9 @@ uint64_t rrandom(uint64_t array[])
 }
 
 // Hill-climbing
-uint64_t hc(uint64_t array[])
+uint64_t hc(const uint64_t array[])
 {
+	assert(array != NULL);
 	uint64_t min = INT64_MAX;
 	int64_t abs_min = INT64_MAX;
 	int64_t sum = 0;
@@ -245,7 +239,7 @@ uint64_t hc(uint64_t array[])
 }
 
 // Simulated annealing
-uint64_t sa(uint64_t array[])
+uint64_t sa(const uint64_t array[])
 {
 	for (unsigned int i = 0; i < ITERS; ++i)
 	{
@@ -310,18 +304,4 @@ uint64_t* randArray()
 		arr[i] = gen();
 	}
 	return arr;
-}
-
-bool sorted(uint64_t * array)
-{
-	for (int i = 0; i < SIZE - 1; ++i)
-	{
-		if (array[i] < array[i + 1])
-		{
-			printf("index = %d\n", i);
-			printf("%llu  %llu\n", array[i], array[i+1]);
-			return false;
-		}
-	}
-	return true;
 }
