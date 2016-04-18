@@ -183,6 +183,7 @@ uint64_t hc(uint64_t array[])
 	bool set[SIZE];
 
 	printf("hi\n");
+	printf("hello %i\n", array[0]);
 	// print out array
 	for (int i = 0; i < SIZE; i++)
 	{
