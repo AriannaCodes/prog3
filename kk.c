@@ -1,5 +1,6 @@
 // kk.c
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -17,8 +18,9 @@ uint64_t kk(uint64_t array[]);
 uint64_t rrandom(uint64_t array[]);
 uint64_t hc(uint64_t array[]);
 uint64_t sa(uint64_t array[]);
-int compare(const void * a, const void * b);
+int compare(void const*a, void const*b);
 unsigned int binary(uint64_t value, uint64_t array[], unsigned int lower, unsigned int upper);
+bool sorted(uint64_t * array);
 
 int main(int argc, char * argv[])
 {
@@ -97,22 +99,42 @@ uint64_t kk(uint64_t array[])
 	// recursively find differences
 	while (true)
 	{
+		assert(sorted(diffArray));
+		for (unsigned int i = 0; i < 5; ++i)
+		{
+			printf("%llu  ", diffArray[i]);
+		}
+		printf("\n");
 		if (diffArray[1] == 0)  break;
 		diffArray[0] -= diffArray[1];
 		diffArray[1] = 0;
+		// qsort(diffArray, SIZE, sizeof(uint64_t), uComp0);
 		// binary search
-		unsigned int index_before = binary(diffArray[0], diffArray, 1, SIZE);
-		
-		// shift over
-		uint64_t temp = diffArray[0];
-		for (unsigned int i = 2; i <= index_before; ++i)
+		if (diffArray[0] < diffArray[2])
 		{
-			diffArray[i - 2] = diffArray[i];
+			unsigned int index_before = binary(diffArray[0], diffArray, 2, SIZE - 1);
+			printf("%d\n", index_before);
+			// shift over
+			uint64_t temp = diffArray[0];
+			for (unsigned int i = 2; i <= index_before; ++i)
+			{
+				diffArray[i - 2] = diffArray[i];
+			}
+			diffArray[index_before - 1] = temp;
+			for (unsigned int i = index_before; i < SIZE - 1; ++i)
+			{
+				diffArray[i] = diffArray[i + 1];
+			}
+			diffArray[SIZE - 1] = 0;
 		}
-
-		// insert
-		diffArray[index_before - 1] = temp;
-		diffArray[index_before] = 0;
+		else
+		{
+			for (unsigned int i = 1; i < SIZE - 1; ++i)
+			{
+				diffArray[i] = diffArray[i + 1];
+			}
+			diffArray[SIZE - 1] = 0;
+		}
 	}
 
 	// return best
@@ -171,21 +193,23 @@ uint64_t sa(uint64_t array[])
 
 unsigned int binary(uint64_t value, uint64_t array[], unsigned int lower, unsigned int upper)
 {
+    assert(lower <= upper);
+
     // calculate mid
     unsigned int mid = lower + ((upper - lower) / 2);
     
     // are we done?
-    if (mid == upper)
+    if (mid == SIZE - 1)
     {
     	return mid;
     }
-    if (array[mid] <= value && array[mid + 1] > value)
+    if (array[mid] >= value && array[mid + 1] < value)
     {
         return mid;
     }
     
     // we're not done
-    if (array[mid] > value)
+    if (array[mid] < value)
     {
         return binary(value, array, lower, mid - 1);
     }
@@ -195,10 +219,14 @@ unsigned int binary(uint64_t value, uint64_t array[], unsigned int lower, unsign
     }
 }
 
-// from c++reference
-int compare(const void * a, const void * b)
-{
-  	return ((*(uint64_t*)b - *(uint64_t*)a > 0) ? (int) 1 : (int) -1);
+int compare(void const*a, void const*b) {
+  	uint64_t const*const A = a;
+  	uint64_t const*const B = b;
+  	{
+    	uint64_t const a = *A;
+    	uint64_t const b = *B;
+    	return (a > b) ? -1 : (a < b);
+  	}
 }
 
 // from http://stackoverflow.com/questions/7920860/
@@ -219,4 +247,18 @@ uint64_t* randArray()
 		arr[i] = gen();
 	}
 	return arr;
+}
+
+bool sorted(uint64_t * array)
+{
+	for (int i = 0; i < SIZE - 1; ++i)
+	{
+		if (array[i] < array[i + 1])
+		{
+			printf("index = %d\n", i);
+			printf("%llu  %llu\n", array[i], array[i+1]);
+			return false;
+		}
+	}
+	return true;
 }
