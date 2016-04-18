@@ -34,7 +34,7 @@ int main(int argc, char * argv[])
 
 	if (argc == 2)
 	{
-		uint64_t* arr = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+		arr = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
 		
 		printf("Inputfile given! Reading in... \n");
 
@@ -59,8 +59,8 @@ int main(int argc, char * argv[])
 
 			i++;
 		}
-
-		printf("HEY");
+		printf("%lld\n", kk(arr));
+		free(arr);
 
 		fclose(file);
 	}
@@ -73,7 +73,7 @@ int main(int argc, char * argv[])
 		t = time(NULL);
 		srand((unsigned) time(&t));
 
-		uint64_t* arr = randArray();
+		arr = randArray();
 
 		printf("Karmarkar-Karp: %llu\n", kk(arr));
 		printf("Repeated random: %llu\n", rrandom(arr));
