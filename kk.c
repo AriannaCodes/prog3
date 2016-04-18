@@ -52,24 +52,56 @@ int main(int argc, char * argv[])
 	t = time(NULL);
 	srand((unsigned) time(&t));
 
-	if (argc == 2) // inputfile given
+	// create array
+	uint64_t* arr;
+
+	if (argc == 2)
 	{
-		// read the inputfile
-		// run kk
-		printf("Inputfile given\n");
+		uint64_t* arr = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+		
+		printf("Inputfile given! Reading in... \n");
+
+		FILE* file;
+		char* line = NULL;
+		size_t len = 0;
+		ssize_t read;
+
+		file = fopen(argv[1], "r");
+
+		int i = 0;
+		while((read = getline(&line, &len, file)) != -1)
+		{
+			// remove newline
+			size_t ln = strlen(line) - 1;
+			if (*line && line[ln] == '\n') 
+			    line[ln] = '\0';
+
+			arr[i] = atoi(line);
+			printf("%s\n", line);
+			printf("i is %i, arr[i] is %llu...\n", i, arr[i]);
+
+			i++;
+		}
+
+		printf("HEY");
+
+		fclose(file);
 	}
-	else if (argc == 1) // no inputfile given; run comparisons
+	else if (argc == 1)
 	{
 		printf("No inputfile given! Constructing random array...\n");
-		uint64_t* arr = randArray();
-		printf("Repeated random: %i\n", rrandom(arr));
-		printf("Hill-climbing: %i\n", hc(arr));
-		printf("Simulated annealing: %i\n", sa(arr));
+		arr = randArray();
 	}
 	else
 	{
 		printf("Invalid input\n");
+		return 0;
 	}
+
+	printf("Karmarkar-Karp: %i\n", kk(arr));
+	printf("Repeated random: %i\n", rrandom(arr));
+	printf("Hill-climbing: %i\n", hc(arr));
+	printf("Simulated annealing: %i\n", sa(arr));
 }
 
 // Karmarkar-Karp
@@ -99,17 +131,17 @@ unsigned int kk(uint64_t array[])
 	return best;
 }
 
-// Repeated random
+// repeated random
 unsigned int rrandom(uint64_t array[])
 {
-	uint64_t min = MAX;
+	uint64_t min = UINT64_MAX;
 	for (unsigned int i = 0; i < ITERS; ++i)
 	{
-		uint64_t sum = 0;
+		int64_t sum = 0;
 		// randomly assign every element of the array
-		for (int i = 0; i < 100; i++)
+		for (int i = 0; i < SIZE; i++)
 		{
-			if (rand() % 2 == 1)
+			if (rand() % 2 == 0)
 			{
 				sum += array[i];
 			}
@@ -118,15 +150,16 @@ unsigned int rrandom(uint64_t array[])
 				sum -= array[i];
 			}
 		}
-		if (sum < min)
+		uint64_t abs_sum = llabs(sum);
+		if (abs_sum < min)
 		{
-			min = sum;
+			min = abs_sum;
 		}
 	}
 	return min;
 }
 
-// Hill-climbing
+// hill-climbing
 unsigned int hc(uint64_t array[])
 {
 	for (unsigned int i = 0; i < ITERS; ++i)
@@ -136,7 +169,7 @@ unsigned int hc(uint64_t array[])
 	return 0;
 }
 
-// Simulated annealing
+// simulated annealing
 unsigned int sa(uint64_t array[])
 {
 	for (unsigned int i = 0; i < ITERS; ++i)
