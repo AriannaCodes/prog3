@@ -8,7 +8,7 @@
 #include <time.h>
 
 #define ITERS 25000
-#define SIZE 5
+#define SIZE 100
 #define MAX 1000000000000
 
 uint64_t gen();
@@ -47,11 +47,6 @@ uint64_t* randArray()
 
 int main(int argc, char * argv[])
 {
-	// seed random number generator
-	/*time_t t;
-	t = time(NULL);
-	srand((unsigned) time(&t));
-
 	if (argc == 2) // inputfile given
 	{
 		// read the inputfile
@@ -61,7 +56,14 @@ int main(int argc, char * argv[])
 	else if (argc == 1) // no inputfile given; run comparisons
 	{
 		printf("No inputfile given! Constructing random array...\n");
+
+		// make random array
+		time_t t;
+		t = time(NULL);
+		srand((unsigned) time(&t));
 		uint64_t* arr = randArray();
+
+		// run algorithms
 		printf("Repeated random: %i\n", rrandom(arr));
 		printf("Hill-climbing: %i\n", hc(arr));
 		printf("Simulated annealing: %i\n", sa(arr));
@@ -69,9 +71,7 @@ int main(int argc, char * argv[])
 	else
 	{
 		printf("Invalid input\n");
-	}*/
-	uint64_t array[] = {10, 8, 7, 6, 5};
-	printf("%llu\n", rrandom(array));
+	}
 }
 
 // Karmarkar-Karp
@@ -85,14 +85,10 @@ uint64_t kk(uint64_t array[])
 	// recursively find differences
 	while (true)
 	{
-		for (unsigned int i = 0; i < SIZE - 1; i += 2)
-		{
-			if (diffArray[i] == 0)  break;	
-			diffArray[i] = diffArray[i] - diffArray[i + 1];
-			diffArray[i + 1] = 0;
-		}
 		qsort(diffArray, SIZE, sizeof(uint64_t), compare);
 		if (diffArray[1] == 0)  break;
+		diffArray[0] -= diffArray[1];
+		diffArray[1] = 0;
 	}
 
 	// return best
