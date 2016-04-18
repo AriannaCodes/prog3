@@ -1,9 +1,24 @@
 // kk.c
 
 #include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
+
+// from http://stackoverflow.com/questions/7920860/how-to-generate-large-random-numbers-c
+uint64_t gen() 
+{
+	uint64_t num;
+	num = rand();
+	return ((num << 32) + rand()) % 1000000000000;
+}
 
 int main(int argc, char * argv[])
 {
+	// seed random number generator
+	time_t t;
+	t = time(NULL);
+	srand((unsigned) time(&t));
+
 	if (argc == 2) // inputfile given
 	{
 		// read the inputfile
@@ -30,7 +45,7 @@ unsigned int kk()
 }
 
 // Repeated random
-unsigned int random()
+unsigned int rrandom()
 {
 	return 0;
 }
