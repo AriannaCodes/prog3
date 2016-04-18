@@ -52,15 +52,9 @@ int main(int argc, char * argv[])
 			size_t ln = strlen(line) - 1;
 			if (*line && line[ln] == '\n') 
 			    line[ln] = '\0';
-
 			arr[i] = atoi(line);
-			printf("%s\n", line);
-			printf("i is %i, arr[i] is %llu...\n", i, arr[i]);
-
 			i++;
 		}
-
-		printf("HEY");
 
 		fclose(file);
 	}
@@ -73,19 +67,15 @@ int main(int argc, char * argv[])
 		t = time(NULL);
 		srand((unsigned) time(&t));
 
-		uint64_t* arr = randArray();
+		arr = randArray();
 
-		printf("Karmarkar-Karp: %llu\n", kk(arr));
-		printf("Repeated random: %llu\n", rrandom(arr));
-		printf("Hill-climbing: %llu\n", hc(arr));
-		printf("Simulated annealing: %llu\n", sa(arr));
-		free(arr);
 	}
 	else
 	{
 		printf("Invalid input\n");
 		return 0;
 	}
+
 }
 
 // Karmarkar-Karp
