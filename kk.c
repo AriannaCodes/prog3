@@ -70,7 +70,11 @@ int main(int argc, char * argv[])
 		time_t t;
 		t = time(NULL);
 		srand((unsigned) time(&t));
+
 		uint64_t* arr = randArray();
+
+		printf("Karmarkar-Karp: %llu\n", kk(arr));
+		printf("Repeated random: %llu\n", rrandom(arr));
 	}
 	else
 	{
@@ -78,8 +82,6 @@ int main(int argc, char * argv[])
 		return 0;
 	}
 
-	printf("Karmarkar-Karp: %llu\n", kk(arr));
-	printf("Repeated random: %llu\n", rrandom(arr));
 	printf("Hill-climbing: %llu\n", hc(arr));
 	printf("Simulated annealing: %llu\n", sa(arr));
 }
