@@ -1,6 +1,7 @@
 // kk.c
 
 #include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -21,6 +22,7 @@ uint64_t sa(const uint64_t array[]);
 int compare(void const*a, void const*b);
 unsigned int binary(uint64_t value, uint64_t array[], unsigned int lower, unsigned int upper);
 bool sorted(uint64_t * array);
+uint64_t t(unsigned int iter);
 
 int main(int argc, char * argv[])
 {
@@ -62,8 +64,10 @@ int main(int argc, char * argv[])
 	}
 	else if (argc == 1)
 	{
-		printf("No inputfile given! Constructing random array...\n");
+		printf("No inputfile given! Constructing random arrays...\n");
 
+		for (unsigned int instances = 0; instances < 50; ++instances)
+		
 		// make random array
 		time_t t;
 		t = time(NULL);
@@ -71,9 +75,9 @@ int main(int argc, char * argv[])
 
 		arr = randArray();
 
-		printf("Karmarkar-Karp:  %llu\n", kk(arr));
-		printf("Repeated random: %llu\n", rrandom(arr));
-		printf("Hill-climbing:   %llu\n", hc(arr));
+		printf("Karmarkar-Karp:      %llu\n", kk(arr));
+		printf("Repeated random:     %llu\n", rrandom(arr));
+		printf("Hill-climbing:       %llu\n", hc(arr));
 		printf("Simulated annealing: %llu\n", sa(arr));
 		free(arr);
 	}
@@ -218,12 +222,9 @@ uint64_t hc(const uint64_t array[])
 		// get our new absolute sum
 		abs_sum = (sum < 0) ? (-1 * sum) : (sum);
 
-		// printf("old sum: %llu, new sum: %llu\n", abs_min, abs_sum);
-
 		// see if we got better
 		if (abs_sum < abs_min)
 		{
-			// printf("better\n");
 			min = sum;
 			abs_min = abs_sum;
 		}
@@ -234,11 +235,82 @@ uint64_t hc(const uint64_t array[])
 // Simulated annealing
 uint64_t sa(const uint64_t array[])
 {
+	assert(array != NULL);
+	int64_t best_min = INT64_MAX;
+	uint64_t best_abs_min = INT64_MAX;
+	int64_t sum = 0;
+	uint64_t abs_sum = 0;
+
+	// array to store what's in set
+	bool set[SIZE];
+
+	// randomly assign every element of the array
+	for (int i = 0; i < SIZE; i++)
+	{
+		if (rand() % 2 == 0)
+		{
+			sum = sum + array[i];
+			set[i] = true;
+		}
+		else
+		{
+			sum = sum - array[i];
+			set[i] = false;
+		}
+	}
+
+	best_min = sum;
+	best_abs_min = (best_min < 0) ? (-1 * best_min) : (best_min);
+	int64_t init_min = best_min;
+	uint64_t init_abs_min = best_abs_min;
+
+	// iterate through neighbours
 	for (unsigned int i = 0; i < ITERS; ++i)
 	{
-		
+		// randomly gen two places
+		int a = rand() % SIZE;
+		// ensure b != a
+		int b;
+		do {
+			b = rand() % SIZE;
+		} while (b == a);
+
+		// swap (with prob 1/2)
+		sum = init_min;
+		if (rand() % 2 == 0)
+		{
+			set[a] = !set[a];
+			sum = (set[a]) ? (sum + 2*array[a]) : (sum - 2*array[a]);
+		}
+		if (rand() % 2 == 0)
+		{
+			set[b] = !set[b];
+			sum = (set[b]) ? (sum + 2*array[b]) : (sum - 2*array[b]);
+		}
+
+		// get our new absolute sum
+		abs_sum = (sum < 0) ? (-1 * sum) : (sum);
+
+		// see if we got better
+		if (abs_sum < init_abs_min)
+		{
+			init_min = sum;
+			init_abs_min = abs_sum;
+		}
+		// if not, maybe keep the result anyway
+		else if (drand48() <= exp(-1 * (abs_sum - init_abs_min)) / t(i))
+		{
+			init_min = sum;
+			init_abs_min = abs_sum;
+		}
+		// record the best value
+		if (init_abs_min < best_abs_min)
+		{
+			best_min = init_min;
+			best_abs_min = init_abs_min;
+		}
 	}
-	return 0;
+	return best_abs_min;
 }
 
 unsigned int binary(uint64_t value, uint64_t array[], unsigned int lower, unsigned int upper)
@@ -297,4 +369,9 @@ uint64_t* randArray()
 		arr[i] = gen();
 	}
 	return arr;
+}
+
+uint64_t t(unsigned int iter)
+{
+	return (uint64_t) pow(10, 10) * pow(0.8, (int) iter / 300);
 }
