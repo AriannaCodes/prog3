@@ -1,11 +1,11 @@
-unsigned int binary(uint64_t value, uint64_t array[], unsigned int lower, unsigned int upper)
+// performs binary search on an array
+unsigned int binary(uint64_t value, uint64_t array[],
+                    unsigned int lower, unsigned int upper)
 {
-    assert(lower <= upper);
-
-    // calculate mid
+    // calculate midpoint
     unsigned int mid = lower + ((upper - lower) / 2);
     
-    // are we done?
+    // check if done
     if (mid == SIZE - 1)
     {
     	return mid;
@@ -15,18 +15,17 @@ unsigned int binary(uint64_t value, uint64_t array[], unsigned int lower, unsign
         return mid;
     }
     
-    // we're not done
+    // we're not done! continue
     if (array[mid] < value)
     {
         return binary(value, array, lower, mid - 1);
     }
-    else
-    {
-        return binary(value, array, mid + 1, upper);
-    }
+    return binary(value, array, mid + 1, upper);    
 }
 
-int compare(void const*a, void const*b) {
+// compares two values
+int compare(void const *a, void const *b)
+{
   	uint64_t const*const A = a;
   	uint64_t const*const B = b;
   	{
@@ -36,8 +35,9 @@ int compare(void const*a, void const*b) {
   	}
 }
 
-// from http://stackoverflow.com/questions/7920860/
-// how-to-generate-large-random-numbers-c
+// generates a random number between 0 and MAX
+// (from: http://stackoverflow.com/questions/7920860/
+//        how-to-generate-large-random-numbers-c)
 uint64_t gen() 
 {
 	uint64_t num;
@@ -45,7 +45,7 @@ uint64_t gen()
 	return ((num << 32) + rand()) % MAX;
 }
 
-// generate a random array of SIZE 
+// generates a random array of size SIZE 
 uint64_t* randArray()
 {
 	uint64_t* arr = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
