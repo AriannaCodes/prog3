@@ -71,9 +71,9 @@ int main(int argc, char * argv[])
 
 		arr = randArray();
 
-		printf("Karmarkar-Karp: %llu\n", kk(arr));
+		printf("Karmarkar-Karp:  %llu\n", kk(arr));
 		printf("Repeated random: %llu\n", rrandom(arr));
-		printf("Hill-climbing: %llu\n", hc(arr));
+		printf("Hill-climbing:   %llu\n", hc(arr));
 		printf("Simulated annealing: %llu\n", sa(arr));
 		free(arr);
 	}
@@ -191,14 +191,16 @@ uint64_t hc(const uint64_t array[])
 	min = sum;
 	abs_min = (min < 0) ? (-1 * min) : (min);
 
-	printf("min: %llu, abs_min: %llu\n", min, abs_min);
-
 	// iterate through neighbours
-	for (unsigned int i = 0; i < 100; ++i)
+	for (unsigned int i = 0; i < ITERS; ++i)
 	{
 		// randomly gen two places
 		int a = rand() % SIZE;
-		printf("a: %i\n", a);
+		// ensure b != a
+		int b;
+		do {
+			b = rand() % SIZE;
+		} while (b == a);
 
 		// swap (with prob 1/2)
 		sum = min;
@@ -207,16 +209,21 @@ uint64_t hc(const uint64_t array[])
 			set[a] = !set[a];
 			sum = (set[a]) ? (sum + 2*array[a]) : (sum - 2*array[a]);
 		}
+		if (rand() % 2 == 0)
+		{
+			set[b] = !set[b];
+			sum = (set[b]) ? (sum + 2*array[b]) : (sum - 2*array[b]);
+		}
 
 		// get our new absolute sum
 		abs_sum = (sum < 0) ? (-1 * sum) : (sum);
 
-		printf("old sum: %llu, new sum: %llu\n", abs_min, abs_sum);
+		// printf("old sum: %llu, new sum: %llu\n", abs_min, abs_sum);
 
 		// see if we got better
 		if (abs_sum < abs_min)
 		{
-			printf("better\n");
+			// printf("better\n");
 			min = sum;
 			abs_min = abs_sum;
 		}
