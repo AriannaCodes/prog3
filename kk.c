@@ -22,8 +22,9 @@ int main(int argc, char * argv[])
 	time_t ti = time(NULL);
 	srand((unsigned) time(&ti));
 
-	// create array
+	// create arrays
 	uint64_t* arr;
+	uint64_t* pp;
 
 	if (argc == 2)
 	{
@@ -56,15 +57,25 @@ int main(int argc, char * argv[])
 	else if (argc == 1)
 	{
 		printf("No inputfile given! Constructing random arrays...\n");
-		for (unsigned int instances = 0; instances < 50; ++instances)
+		for (unsigned int instances = 0; instances < 1; ++instances)
 		{
 			// make random array
 			arr = randArray();
 
-			printf("%llu,", kk(arr));
-			printf("%llu,", rrandom(arr));
-			printf("%llu,", hc(arr));
-			printf("%llu\n", sa(arr));
+			printf("KK: %llu\n", kk(arr));
+			printf("RR: %llu\n", rr(arr));
+			printf("HC: %llu\n", hc(arr));
+			printf("SA: %llu\n", sa(arr));
+
+			printf("Pre-Partitioning\n");
+
+			pp = prepart(arr);
+			printf("KK: %llu\n", kk(pp));
+			printf("RR: %llu\n", rr(pp));
+			printf("HC: %llu\n", hc(pp));
+			printf("SA: %llu\n", sa(pp));
+
+			free(pp);
 			free(arr);
 		}
 	}
@@ -125,9 +136,11 @@ uint64_t kk(const uint64_t array[])
 }
 
 // Repeated random
-uint64_t rrandom(const uint64_t array[])
+uint64_t rr(const uint64_t array[])
 {
 	uint64_t min = UINT64_MAX;
+
+	// get random assignment
 	for (unsigned int i = 0; i < ITERS; ++i)
 	{
 		int64_t sum = 0;

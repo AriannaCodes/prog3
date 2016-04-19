@@ -1,8 +1,9 @@
 // header.h
 
 // algorithms
+uint64_t* prepart(uint64_t arr[]);
 uint64_t kk(const uint64_t array[]);
-uint64_t rrandom(const uint64_t array[]);
+uint64_t rr(const uint64_t array[]);
 uint64_t hc(const uint64_t array[]);
 uint64_t sa(const uint64_t array[]);
 

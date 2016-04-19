@@ -1,5 +1,16 @@
 // helpers.c
 
+// generates a prepartitioning of an array!
+uint64_t* prepart(uint64_t arr[])
+{
+    uint64_t * set = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+    for (int i = 0; i < SIZE; i++)
+    {
+        set[rand() % SIZE] += arr[i];
+    }
+    return set;
+}
+
 // performs binary search on an array
 unsigned int binary(uint64_t value, uint64_t array[],
                     unsigned int lower, unsigned int upper)
