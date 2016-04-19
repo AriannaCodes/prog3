@@ -44,7 +44,7 @@ uint64_t gen()
 {
 	uint64_t num;
 	num = rand();
-	return ((num << 32) + rand()) % MAX;
+	return (((num << 32) + rand()) % MAX) + 1;
 }
 
 // generates a random array of size SIZE 
