@@ -1,4 +1,8 @@
-// kk.c
+// kk.c -- Abby Lyons & Arianna Benson
+
+#define ITERS 25000
+#define SIZE 100
+#define MAX 1000000000000
 
 #include <assert.h>
 #include <math.h>
@@ -9,27 +13,14 @@
 #include <string.h>
 #include <time.h>
 
-#define ITERS 25000
-#define SIZE 100
-#define MAX 1000000000000
-
-uint64_t gen();
-uint64_t* randArray();
-uint64_t kk(const uint64_t array[]);
-uint64_t rrandom(const uint64_t array[]);
-uint64_t hc(const uint64_t array[]);
-uint64_t sa(const uint64_t array[]);
-int compare(void const*a, void const*b);
-unsigned int binary(uint64_t value, uint64_t array[], unsigned int lower, unsigned int upper);
-bool sorted(uint64_t * array);
-uint64_t t(unsigned int iter);
+#include "header.h"
+#include "helpers.c"
 
 int main(int argc, char * argv[])
 {
 	// seed random number generator
-	time_t t;
-	t = time(NULL);
-	srand((unsigned) time(&t));
+	time_t ti = time(NULL);
+	srand((unsigned) time(&ti));
 
 	// create array
 	uint64_t* arr;
@@ -65,21 +56,17 @@ int main(int argc, char * argv[])
 	else if (argc == 1)
 	{
 		printf("No inputfile given! Constructing random arrays...\n");
-
 		for (unsigned int instances = 0; instances < 50; ++instances)
-		
-		// make random array
-		time_t t;
-		t = time(NULL);
-		srand((unsigned) time(&t));
+		{
+			// make random array
+			arr = randArray();
 
-		arr = randArray();
-
-		printf("Karmarkar-Karp:      %llu\n", kk(arr));
-		printf("Repeated random:     %llu\n", rrandom(arr));
-		printf("Hill-climbing:       %llu\n", hc(arr));
-		printf("Simulated annealing: %llu\n", sa(arr));
-		free(arr);
+			printf("%llu,", kk(arr));
+			printf("%llu,", rrandom(arr));
+			printf("%llu,", hc(arr));
+			printf("%llu\n", sa(arr));
+			free(arr);
+		}
 	}
 	else
 	{
@@ -311,67 +298,4 @@ uint64_t sa(const uint64_t array[])
 		}
 	}
 	return best_abs_min;
-}
-
-unsigned int binary(uint64_t value, uint64_t array[], unsigned int lower, unsigned int upper)
-{
-    assert(lower <= upper);
-
-    // calculate mid
-    unsigned int mid = lower + ((upper - lower) / 2);
-    
-    // are we done?
-    if (mid == SIZE - 1)
-    {
-    	return mid;
-    }
-    if (array[mid] >= value && array[mid + 1] < value)
-    {
-        return mid;
-    }
-    
-    // we're not done
-    if (array[mid] < value)
-    {
-        return binary(value, array, lower, mid - 1);
-    }
-    else
-    {
-        return binary(value, array, mid + 1, upper);
-    }
-}
-
-int compare(void const*a, void const*b) {
-  	uint64_t const*const A = a;
-  	uint64_t const*const B = b;
-  	{
-    	uint64_t const a = *A;
-    	uint64_t const b = *B;
-    	return (a > b) ? -1 : (a < b);
-  	}
-}
-
-// from http://stackoverflow.com/questions/7920860/
-// how-to-generate-large-random-numbers-c
-uint64_t gen() 
-{
-	uint64_t num;
-	num = rand();
-	return ((num << 32) + rand()) % MAX;
-}
-
-// generate a random array of SIZE 
-uint64_t* randArray()
-{
-	uint64_t* arr = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
-	for (int i = 0; i < SIZE; i++)
-	{
-		arr[i] = gen();
-	}
-	return arr;
-}
-
-uint64_t t(unsigned int iter)
-{
-	return (uint64_t) pow(10, 10) * pow(0.8, (int) iter / 300);
 }
