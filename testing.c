@@ -10,8 +10,10 @@
 uint64_t gen() 
 {
 	uint64_t num;
-	num = rand();
-	return (((num << 32) + rand()) % MAX) + 1;
+	int a = (rand() % 2 == 0) ? 1 : 0;
+	int b = (rand() % 2 == 0) ? 1 : 0;
+	num = 2 * rand() + a;
+	return (((num << 32) + 2*rand() + b) % MAX) + 1;
 }
 
 int main(int argc, char * argv[])
@@ -19,7 +21,6 @@ int main(int argc, char * argv[])
 	time_t ti = time(NULL);
 	srand((unsigned) time(&ti));
 
-	printf("1000000000000\n");
-	for (int i = 0; i < 20; i++)
-		printf("%llu \n", gen());
+	for (int i = 0; i < 100000; i++)
+		printf("%llu\n", gen());
 }
