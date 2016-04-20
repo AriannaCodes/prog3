@@ -2,31 +2,6 @@
 
 #include "helpers.h"
 
-// performs binary search on an array
-unsigned int binary(uint64_t value, uint64_t array[],
-                    unsigned int lower, unsigned int upper)
-{
-    // calculate midpoint
-    unsigned int mid = lower + ((upper - lower) / 2);
-    
-    // check if done
-    if (mid == SIZE - 1)
-    {
-    	return mid;
-    }
-    if (array[mid] >= value && array[mid + 1] < value)
-    {
-        return mid;
-    }
-    
-    // we're not done! continue
-    if (array[mid] < value)
-    {
-        return binary(value, array, lower, mid - 1);
-    }
-    return binary(value, array, mid + 1, upper);    
-}
-
 // compares two values
 int compare(void const *a, void const *b)
 {
