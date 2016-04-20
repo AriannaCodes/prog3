@@ -24,7 +24,6 @@ int main(int argc, char * argv[])
 
 	// create arrays
 	uint64_t* arr;
-	uint64_t* pp;
 
 	if (argc == 2)
 	{
@@ -63,19 +62,14 @@ int main(int argc, char * argv[])
 			arr = randArray();
 
 			printf("KK: %llu\n", kk(arr));
-			printf("RR: %llu\n", rr(arr));
-			printf("HC: %llu\n", hc(arr));
+			printf("RR: %llu\n", rr(arr, false));
+			printf("HC: %llu\n", hc(arr, false));
 			printf("SA: %llu\n", sa(arr));
 
-			printf("Pre-Partitioning\n");
+			printf("Pre-partitioning!\n");
+			printf("RR: %llu\n", rr(arr, true));
+			printf("HC: %llu\n", hc(arr, true));
 
-			pp = prepart(arr);
-			printf("KK: %llu\n", kk(pp));
-			printf("RR: %llu\n", rr(pp));
-			printf("HC: %llu\n", hc(pp));
-			printf("SA: %llu\n", sa(pp));
-
-			free(pp);
 			free(arr);
 		}
 	}
@@ -135,28 +129,53 @@ uint64_t kk(const uint64_t array[])
 	return best;
 }
 
-// Repeated random
-uint64_t rr(const uint64_t array[])
+// REPEATED RANDOM
+// if pp = true, repeatedly prepartitions and runs kk on array
+uint64_t rr(const uint64_t array[], bool pp)
 {
+	// declare sums and min
 	uint64_t min = UINT64_MAX;
+	int64_t sum = 0;
+	uint64_t abs_sum;
 
+	// store partitioning
+	int* part;
+	uint64_t * full;
+
+	// make a copy of original array for modification
+	uint64_t* copy = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+	memcpy(copy, array, SIZE * sizeof(uint64_t));	
+	
 	// get random assignment
 	for (unsigned int i = 0; i < ITERS; ++i)
 	{
-		int64_t sum = 0;
-		// randomly assign every element of the array
-		for (int i = 0; i < SIZE; i++)
+		// if pp, then preparition our array
+		if (pp)
 		{
-			if (rand() % 2 == 0)
-			{
-				sum += array[i];
-			}
-			else
-			{
-				sum -= array[i];
-			}
+			part = prepart(array);
+			full = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+			for (int i = 0; i < SIZE; i++)
+		    {
+		        copy[part[i]] += array[i];
+		    }
+		    abs_sum = kk(copy);
 		}
-		uint64_t abs_sum = llabs(sum);
+		else
+		{
+			// randomly assign every element of the array
+			for (int i = 0; i < SIZE; i++)
+			{
+				if (rand() % 2 == 0)
+				{
+					sum += copy[i];
+				}
+				else
+				{
+					sum -= copy[i];
+				}
+			}
+			abs_sum = llabs(sum);
+		}
 		if (abs_sum < min)
 		{
 			min = abs_sum;
@@ -165,8 +184,8 @@ uint64_t rr(const uint64_t array[])
 	return min;
 }
 
-// Hill-climbing
-uint64_t hc(const uint64_t array[])
+// HILL-CLIMBING
+uint64_t hc(const uint64_t array[], bool pp)
 {
 	assert(array != NULL);
 	int64_t min = INT64_MAX;
@@ -232,7 +251,7 @@ uint64_t hc(const uint64_t array[])
 	return abs_min;
 }
 
-// Simulated annealing
+// SIMULATED ANNEALING
 uint64_t sa(const uint64_t array[])
 {
 	assert(array != NULL);

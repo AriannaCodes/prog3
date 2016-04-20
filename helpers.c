@@ -1,12 +1,12 @@
 // helpers.c
 
 // generates a prepartitioning of an array!
-uint64_t* prepart(uint64_t arr[])
+int* prepart(const uint64_t arr[])
 {
-    uint64_t * set = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+    int * set = (int *) malloc(SIZE * sizeof(int));
     for (int i = 0; i < SIZE; i++)
     {
-        set[rand() % SIZE] += arr[i];
+        set[i] = rand() % SIZE;
     }
     return set;
 }
