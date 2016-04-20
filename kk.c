@@ -185,9 +185,9 @@ uint64_t rr(const uint64_t array[], bool pp)
 }
 
 // HILL-CLIMBING
+// if pp = true, prepartitions, runs kk, then iterates
 uint64_t hc(const uint64_t array[], bool pp)
 {
-	assert(array != NULL);
 	int64_t min = INT64_MAX;
 	uint64_t abs_min = INT64_MAX;
 	int64_t sum = 0;
