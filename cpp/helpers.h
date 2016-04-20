@@ -1,0 +1,16 @@
+// helpers.h
+
+#define MAX 1000000000000
+#define SIZE 100
+
+#include <math.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+unsigned int binary(uint64_t value, uint64_t array[], unsigned int lower, unsigned int upper);
+int compare(void const*a, void const*b);
+uint64_t gen();
+int* prepart(const uint64_t arr[]);
+uint64_t* randArray();
+bool sorted(uint64_t * array);
+uint64_t t(unsigned int iter);
