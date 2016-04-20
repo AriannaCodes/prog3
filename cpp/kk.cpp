@@ -122,6 +122,7 @@ bool* kk_arr(const uint64_t array[])
 	for (unsigned int i = 0; i < SIZE; ++i)
 	{
 		q.push(Node(array[i], i));
+		// printf("Node %i has value %llu\n", i, array[i]);
 	}
 	q.push(Node(0, -1));
 	q.push(Node(0, -1));
@@ -138,13 +139,23 @@ bool* kk_arr(const uint64_t array[])
 			{
 				set[a.index] = true;
 				y = y + a.num;
-				printf("big goes into y\n");
+				 printf("%llu goes into Y\n", a.num);
 			}
 			if (b.index != -1)
 			{
-				set[b.index] = false;
-				x = x + b.num;
-				printf("small goes into x\n");
+				// if our a.index wasn't empty
+				if (a.index != -1)
+				{
+					set[b.index] = false;
+					x = x + b.num;
+					 printf("%llu goes into X\n", b.num);
+				}
+				else
+				{
+					set[b.index] = true;
+					y = y + b.num;
+					 printf("%llu goes into Y\n", b.num);
+				}
 			}
 		}
 		else
@@ -154,14 +165,23 @@ bool* kk_arr(const uint64_t array[])
 			{
 				set[a.index] = false;
 				x = x + a.num;
-				printf("big goes into x\n");
+				 printf("%llu goes into X\n", a.num);
 			}
 			// put smaller elt in bigger set
 			if (b.index != -1)
 			{
-				set[b.index] = true;
-				y = y + b.num;
-				printf("small goes into y\n");
+				if (a.index != -1)
+				{
+					set[b.index] = true;
+					y = y + b.num;
+					 printf("%llu goes into Y\n", b.num);
+				}
+				else
+				{
+					set[b.index] = false;
+					x = x + b.num;
+					 printf("%llu goes into X\n", b.num);
+				}
 			}
 		}
 
