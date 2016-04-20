@@ -49,13 +49,13 @@ int compare(void const *a, void const *b)
 }
 
 // generates a random number between 0 and MAX
-// (from: http://stackoverflow.com/questions/7920860/
-//        how-to-generate-large-random-numbers-c)
 uint64_t gen() 
 {
-	uint64_t num;
-	num = rand();
-	return (((num << 32) + rand()) % MAX) + 1;
+    uint64_t num;
+    int a = (rand() % 2 == 0) ? 1 : 0;
+    int b = (rand() % 2 == 0) ? 1 : 0;
+    num = 2 * rand() + a;
+    return (((num << 32) + 2*rand() + b) % MAX) + 1;
 }
 
 // generates a random array of size SIZE 
