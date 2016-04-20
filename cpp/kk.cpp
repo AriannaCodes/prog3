@@ -3,6 +3,23 @@
 #include "helpers.h"
 #include "kk.h"
 
+struct Node
+{
+    uint64_t num;
+    int index;
+
+    Node(uint64_t n, int i) 
+    : num(n), index(i)
+    {
+    }
+
+    bool operator<(const struct Node& other) const
+    {
+        //Your priority logic goes here
+        return num < other.num;
+    }
+};
+
 int main(int argc, char * argv[])
 {
 	// seed random number generator
@@ -53,6 +70,9 @@ int main(int argc, char * argv[])
 			printf("HC: %llu\n", hc(arr, false));
 			printf("SA: %llu\n", sa(arr));
 
+			getResidue(arr, kk_arr(arr));
+			return 0;
+
 			printf("Pre-partitioning!\n");
 			printf("RR: %llu\n", rr(arr, true));
 			printf("HC: %llu\n", hc(arr, true));
@@ -68,7 +88,6 @@ int main(int argc, char * argv[])
 
 }
 
-// Karmarkar-Karp
 uint64_t kk(const uint64_t array[])
 {
 	// priority queue implementation
@@ -87,6 +106,71 @@ uint64_t kk(const uint64_t array[])
 		q.pop();
 		if (b == 0)  return a;
 		q.push(a - b);
+	}
+}
+
+// Karmarkar-Karp
+bool* kk_arr(const uint64_t array[])
+{
+	// store what's in our set
+	bool* set = (bool *) malloc(SIZE * sizeof(bool));
+	int64_t x = 0;
+	int64_t y = 0;
+
+	// priority queue implementation
+	std::priority_queue<Node> q;
+	for (unsigned int i = 0; i < SIZE; ++i)
+	{
+		q.push(Node(array[i], i));
+	}
+	q.push(Node(0, -1));
+	q.push(Node(0, -1));
+	while (true)
+	{
+		Node a = q.top();
+		q.pop();
+		Node b = q.top();
+		q.pop();
+
+		if (y < x)
+		{
+			if (a.index != -1)
+			{
+				set[a.index] = true;
+				y = y + a.num;
+				printf("big goes into y\n");
+			}
+			if (b.index != -1)
+			{
+				set[b.index] = false;
+				x = x + b.num;
+				printf("small goes into x\n");
+			}
+		}
+		else
+		{
+			// put bigger elt in smaller set
+			if (a.index != -1)
+			{
+				set[a.index] = false;
+				x = x + a.num;
+				printf("big goes into x\n");
+			}
+			// put smaller elt in bigger set
+			if (b.index != -1)
+			{
+				set[b.index] = true;
+				y = y + b.num;
+				printf("small goes into y\n");
+			}
+		}
+
+		if (b.num == 0) 
+	    {
+	    	printf("X: %lli\nY: %lli\nDiff:%lli\n", x, y, x - y);
+	    	return set;
+	    }
+		q.push(Node(a.num - b.num, -1));
 	}
 }
 
@@ -143,6 +227,26 @@ uint64_t rr(const uint64_t array[], bool pp)
 		}
 	}
 	return min;
+}
+
+void getResidue(const uint64_t array[], bool* set)
+{
+	int64_t sum = 0;
+
+	// randomly assign every element of the array
+	for (int i = 0; i < SIZE; i++)
+	{
+		if (set[i])
+		{
+			sum = sum + array[i];
+		}
+		else
+		{
+			sum = sum - array[i];
+		}
+	}
+
+	printf("%lli\n", sum);
 }
 
 // HILL-CLIMBING
