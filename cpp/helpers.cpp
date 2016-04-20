@@ -1,5 +1,7 @@
 // helpers.cpp
 
+#include "helpers.h"
+
 // performs binary search on an array
 unsigned int binary(uint64_t value, uint64_t array[],
                     unsigned int lower, unsigned int upper)
@@ -28,8 +30,8 @@ unsigned int binary(uint64_t value, uint64_t array[],
 // compares two values
 int compare(void const *a, void const *b)
 {
-  	uint64_t const*const A = a;
-  	uint64_t const*const B = b;
+  	uint64_t * const A = (uint64_t *) a;
+  	uint64_t * const B = (uint64_t *) b;
   	{
     	uint64_t const a = *A;
     	uint64_t const b = *B;
@@ -45,6 +47,16 @@ uint64_t gen()
 	uint64_t num;
 	num = rand();
 	return (((num << 32) + rand()) % MAX) + 1;
+}
+
+int* prepart(const uint64_t arr[])
+{
+    int * set = (int *) malloc(SIZE * sizeof(int));
+    for (int i = 0; i < SIZE; i++)
+    {
+        set[i] = rand() % SIZE;
+    }
+    return set;
 }
 
 // generates a random array of size SIZE 

@@ -1,20 +1,7 @@
 // kk.cpp -- Abby Lyons & Arianna Benson
 
-#define ITERS 25000
-#define SIZE 100
-#define MAX 1000000000000
-
-#include <assert.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-
-#include "header.h"
-#include "helpers.cpp"
+#include "helpers.h"
+#include "kk.h"
 
 int main(int argc, char * argv[])
 {
@@ -22,7 +9,7 @@ int main(int argc, char * argv[])
 	time_t ti = time(NULL);
 	srand((unsigned) time(&ti));
 
-	// create array
+	// create arrays
 	uint64_t* arr;
 
 	if (argc == 2)
@@ -56,15 +43,20 @@ int main(int argc, char * argv[])
 	else if (argc == 1)
 	{
 		printf("No inputfile given! Constructing random arrays...\n");
-		for (unsigned int instances = 0; instances < 50; ++instances)
+		for (unsigned int instances = 0; instances < 1; ++instances)
 		{
 			// make random array
 			arr = randArray();
 
-			printf("%llu,", kk(arr));
-			printf("%llu,", rrandom(arr));
-			printf("%llu,", hc(arr));
-			printf("%llu\n", sa(arr));
+			printf("KK: %llu\n", kk(arr));
+			printf("RR: %llu\n", rr(arr, false));
+			printf("HC: %llu\n", hc(arr, false));
+			printf("SA: %llu\n", sa(arr));
+
+			printf("Pre-partitioning!\n");
+			printf("RR: %llu\n", rr(arr, true));
+			printf("HC: %llu\n", hc(arr, true));
+
 			free(arr);
 		}
 	}
@@ -79,71 +71,72 @@ int main(int argc, char * argv[])
 // Karmarkar-Karp
 uint64_t kk(const uint64_t array[])
 {
-	// sort in reverse order
-	uint64_t * diffArray = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
-	memcpy(diffArray, array, SIZE * sizeof(uint64_t));
-	qsort(diffArray, SIZE, sizeof(uint64_t), compare);
-
-	// recursively find differences
+	// priority queue implementation
+	std::priority_queue<uint64_t> q;
+	for (unsigned int i = 0; i < SIZE; ++i)
+	{
+		q.push(array[i]);
+	}
+	q.push(0);
+	q.push(0);
 	while (true)
 	{
-		if (diffArray[1] == 0)  break;
-		diffArray[0] -= diffArray[1];
-		diffArray[1] = 0;
-		
-		// binary search
-		if (diffArray[0] < diffArray[2])
+		uint64_t a = q.top();
+		q.pop();
+		uint64_t b = q.top();
+		q.pop();
+		if (b == 0)  return a;
+		q.push(a - b);
+	}
+}
+
+// REPEATED RANDOM
+// if pp = true, repeatedly prepartitions and runs kk on array
+uint64_t rr(const uint64_t array[], bool pp)
+{
+	// declare sums and min
+	uint64_t min = UINT64_MAX;
+	int64_t sum = 0;
+	uint64_t abs_sum;
+
+	// store partitioning
+	int* part;
+	uint64_t * full;
+
+	// make a copy of original array for modification
+	uint64_t* copy = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+	memcpy(copy, array, SIZE * sizeof(uint64_t));	
+	
+	// get random assignment
+	for (unsigned int i = 0; i < ITERS; ++i)
+	{
+		// if pp, then preparition our array
+		if (pp)
 		{
-			unsigned int index_before = binary(diffArray[0], diffArray, 2, SIZE - 1);
-			// shift over
-			uint64_t temp = diffArray[0];
-			for (unsigned int i = 2; i <= index_before; ++i)
-			{
-				diffArray[i - 2] = diffArray[i];
-			}
-			diffArray[index_before - 1] = temp;
-			for (unsigned int i = index_before; i < SIZE - 1; ++i)
-			{
-				diffArray[i] = diffArray[i + 1];
-			}
-			diffArray[SIZE - 1] = 0;
+			part = prepart(array);
+			full = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+			for (int i = 0; i < SIZE; i++)
+		    {
+		        copy[part[i]] += array[i];
+		    }
+		    abs_sum = kk(copy);
 		}
 		else
 		{
-			for (unsigned int i = 1; i < SIZE - 1; ++i)
+			// randomly assign every element of the array
+			for (int i = 0; i < SIZE; i++)
 			{
-				diffArray[i] = diffArray[i + 1];
+				if (rand() % 2 == 0)
+				{
+					sum += copy[i];
+				}
+				else
+				{
+					sum -= copy[i];
+				}
 			}
-			diffArray[SIZE - 1] = 0;
+			abs_sum = llabs(sum);
 		}
-	}
-
-	// return best
-	uint64_t best = diffArray[0];
-	free(diffArray);
-	return best;
-}
-
-// Repeated random
-uint64_t rrandom(const uint64_t array[])
-{
-	uint64_t min = UINT64_MAX;
-	for (unsigned int i = 0; i < ITERS; ++i)
-	{
-		int64_t sum = 0;
-		// randomly assign every element of the array
-		for (int i = 0; i < SIZE; i++)
-		{
-			if (rand() % 2 == 0)
-			{
-				sum += array[i];
-			}
-			else
-			{
-				sum -= array[i];
-			}
-		}
-		uint64_t abs_sum = llabs(sum);
 		if (abs_sum < min)
 		{
 			min = abs_sum;
@@ -152,10 +145,10 @@ uint64_t rrandom(const uint64_t array[])
 	return min;
 }
 
-// Hill-climbing
-uint64_t hc(const uint64_t array[])
+// HILL-CLIMBING
+// if pp = true, prepartitions, runs kk, then iterates
+uint64_t hc(const uint64_t array[], bool pp)
 {
-	assert(array != NULL);
 	int64_t min = INT64_MAX;
 	uint64_t abs_min = INT64_MAX;
 	int64_t sum = 0;
@@ -219,7 +212,7 @@ uint64_t hc(const uint64_t array[])
 	return abs_min;
 }
 
-// Simulated annealing
+// SIMULATED ANNEALING
 uint64_t sa(const uint64_t array[])
 {
 	assert(array != NULL);
