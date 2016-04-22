@@ -4,23 +4,6 @@
 #include "helpers.h"
 #include "kk.h"
 
-// represents an edge between two indices
-struct Edge
-{
-    int fst;
-    int snd;
-
-    Edge(int a, int b) : fst(a), snd(b)
-    {
-    }
-
-    bool operator<(const struct Edge& other) const
-    {
-        //Your priority logic goes here
-        return fst < other.fst;
-    }
-};
-
 struct Node
 {
     uint64_t num;
@@ -87,9 +70,6 @@ int main(int argc, char * argv[])
 			printf("HC: %llu\n", hc(arr, false));
 			printf("SA: %llu\n", sa(arr));
 
-			getResidue(arr, kk_arr(arr));
-			return 0;
-
 			printf("Pre-partitioning!\n");
 			printf("RR: %llu\n", rr(arr, true));
 			printf("HC: %llu\n", hc(arr, true));
@@ -123,60 +103,6 @@ uint64_t kk(const uint64_t array[])
 		q.pop();
 		if (b == 0)  return a;
 		q.push(a - b);
-	}
-}
-
-// Karmarkar-Karp, with sets
-bool* kk_arr(const uint64_t array[])
-{
-	// store what's in our set
-	bool* set = (bool *) malloc(SIZE * sizeof(bool));
-
-	// create a list of edges
-	std::list<int> *edges = new std::list<int>[SIZE];
-
-	// priority queue implementation
-	std::priority_queue<Node> q;
-	for (unsigned int i = 0; i < SIZE; ++i)
-	{
-		q.push(Node(array[i], i));
-	}
-	q.push(Node(0, -1));
-	q.push(Node(0, -1));
-	while (true)
-	{
-		// get nodes
-		Node a = q.top();
-		q.pop();
-		Node b = q.top();
-		q.pop();
-
-		// store edges
-		if (a.index != -1 && b.index != -1)
-		{
-			edges[a.index].push_back(b.index);
-			edges[b.index].push_back(a.index);
-		}
-
-		// we've completed! calculate sets based on edges
-		if (b.num == 0) 
-	    {
-	    	int count = 0; // keep track of how many nodes visited
-			bool* visited = (bool *) malloc(SIZE * sizeof(bool));
-			while (count < SIZE)
-			{
-				// dfs from a random node
-				count = count + dfs(set, edges, visited,
-								    rand() % SIZE, true, 0);
-			}
-			for (int i = 0; i < SIZE; i++)
-			{
-				printf("elt %i is in set %c\n", i, (set[i]) ? 'A' : 'B');
-			}
-			return set;
-	    }
-
-		q.push(Node(a.num - b.num, -1));
 	}
 }
 
