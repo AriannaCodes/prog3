@@ -1,15 +1,32 @@
 // kk.cpp -- Abby Lyons & Arianna Benson
 
+#include <list>
 #include "helpers.h"
 #include "kk.h"
+
+// represents an edge between two indices
+struct Edge
+{
+    int fst;
+    int snd;
+
+    Edge(int a, int b) : fst(a), snd(b)
+    {
+    }
+
+    bool operator<(const struct Edge& other) const
+    {
+        //Your priority logic goes here
+        return fst < other.fst;
+    }
+};
 
 struct Node
 {
     uint64_t num;
     int index;
 
-    Node(uint64_t n, int i) 
-    : num(n), index(i)
+    Node(uint64_t n, int i) : num(n), index(i)
     {
     }
 
@@ -114,82 +131,48 @@ bool* kk_arr(const uint64_t array[])
 {
 	// store what's in our set
 	bool* set = (bool *) malloc(SIZE * sizeof(bool));
-	int64_t x = 0;
-	int64_t y = 0;
+
+	// create a list of edges
+	std::list<int> *edges = new std::list<int>[SIZE];
+	//std::list<int> edges[SIZE];
 
 	// priority queue implementation
 	std::priority_queue<Node> q;
 	for (unsigned int i = 0; i < SIZE; ++i)
 	{
 		q.push(Node(array[i], i));
-		// printf("Node %i has value %llu\n", i, array[i]);
 	}
 	q.push(Node(0, -1));
 	q.push(Node(0, -1));
 	while (true)
 	{
+		// get nodes
 		Node a = q.top();
 		q.pop();
 		Node b = q.top();
 		q.pop();
 
-		if (y < x)
+		// store edges
+		if (a.index != -1 && b.index != -1)
 		{
-			if (a.index != -1)
-			{
-				set[a.index] = true;
-				y = y + a.num;
-				 printf("%llu goes into Y\n", a.num);
-			}
-			if (b.index != -1)
-			{
-				// if our a.index wasn't empty
-				if (a.index != -1)
-				{
-					set[b.index] = false;
-					x = x + b.num;
-					 printf("%llu goes into X\n", b.num);
-				}
-				else
-				{
-					set[b.index] = true;
-					y = y + b.num;
-					 printf("%llu goes into Y\n", b.num);
-				}
-			}
-		}
-		else
-		{
-			// put bigger elt in smaller set
-			if (a.index != -1)
-			{
-				set[a.index] = false;
-				x = x + a.num;
-				 printf("%llu goes into X\n", a.num);
-			}
-			// put smaller elt in bigger set
-			if (b.index != -1)
-			{
-				if (a.index != -1)
-				{
-					set[b.index] = true;
-					y = y + b.num;
-					 printf("%llu goes into Y\n", b.num);
-				}
-				else
-				{
-					set[b.index] = false;
-					x = x + b.num;
-					 printf("%llu goes into X\n", b.num);
-				}
-			}
+			edges[a.index].push_back(b.index);
+			edges[b.index].push_back(a.index);
 		}
 
+		// we've completed! calculate sets based on edges
 		if (b.num == 0) 
 	    {
-	    	printf("X: %lli\nY: %lli\nDiff:%lli\n", x, y, x - y);
-	    	return set;
+	    	int count = 0; // keep track of how many nodes visited
+			bool* visited = (bool *) malloc(SIZE * sizeof(bool));
+			while (count < SIZE)
+			{
+				// dfs from a random node
+				count = count + dfs(set, edges, visited,
+								    rand() % SIZE, true, 0);
+			}
+			return set;
 	    }
+
 		q.push(Node(a.num - b.num, -1));
 	}
 }
