@@ -126,7 +126,7 @@ uint64_t kk(const uint64_t array[])
 	}
 }
 
-// Karmarkar-Karp
+// Karmarkar-Karp, with sets
 bool* kk_arr(const uint64_t array[])
 {
 	// store what's in our set
@@ -134,7 +134,6 @@ bool* kk_arr(const uint64_t array[])
 
 	// create a list of edges
 	std::list<int> *edges = new std::list<int>[SIZE];
-	//std::list<int> edges[SIZE];
 
 	// priority queue implementation
 	std::priority_queue<Node> q;
@@ -169,6 +168,10 @@ bool* kk_arr(const uint64_t array[])
 				// dfs from a random node
 				count = count + dfs(set, edges, visited,
 								    rand() % SIZE, true, 0);
+			}
+			for (int i = 0; i < SIZE; i++)
+			{
+				printf("elt %i is in set %c\n", i, (set[i]) ? 'A' : 'B');
 			}
 			return set;
 	    }

@@ -56,7 +56,6 @@ uint64_t t(unsigned int iter)
 int dfs(bool* set, std::list<int> *edges, bool* visited,
          int j, bool cur, int count)
 {
-    printf("visited %i\n", j);
     if (!visited[j])
     {
       // increment total count
@@ -77,6 +76,7 @@ int dfs(bool* set, std::list<int> *edges, bool* visited,
           }
       }
     }
+    printf("visited %i\n", j);
     printf("count %i\n", count);
     return count;
 }
