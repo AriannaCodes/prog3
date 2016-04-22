@@ -1,7 +1,7 @@
 // helpers.h
 
-#define MAX 10
-#define SIZE 5
+#define MAX 1000000000
+#define SIZE 100
 
 #include <math.h>
 #include <stdint.h>
