@@ -53,6 +53,7 @@ int main(int argc, char * argv[])
 			i++;
 		}
 		printf("Karmarkar-Karp: %llu\n", kk(arr));
+		getResidue(arr, kk_arr(arr));
 		free(arr);
 
 		fclose(file);
@@ -134,35 +135,53 @@ bool* kk_arr(const uint64_t array[])
 
 		if (y < x)
 		{
-			if (a.index != -1)
+			if (a.index != -1 && b.index != -1)
 			{
-				set[a.index] = true;
+				set[a.index] = false;
 				y = y + a.num;
-				printf("big goes into y\n");
+				set[b.index] = true;
+				x = x + b.num;
 			}
-			if (b.index != -1)
+			else if (a.index != -1)
+			{
+				set[a.index] = false;
+				y = y + a.num;
+			}
+			else if (b.index != -1)
 			{
 				set[b.index] = false;
-				x = x + b.num;
-				printf("small goes into x\n");
+				y = y + b.num;
 			}
 		}
 		else
 		{
 			// put bigger elt in smaller set
-			if (a.index != -1)
+			if (a.index != -1 && b.index != -1)
 			{
-				set[a.index] = false;
+				set[a.index] = true;
 				x = x + a.num;
-				printf("big goes into x\n");
+				set[b.index] = false;
+				y = y + b.num;
 			}
+			else if (a.index != -1)
+			{
+				set[a.index] = true;
+				x = x + a.num;
+			}
+			else if (b.index != -1)
+			{
+				set[b.index] = true;
+				x = x + b.num;
+			}
+
+			/*
 			// put smaller elt in bigger set
 			if (b.index != -1)
 			{
 				set[b.index] = true;
 				y = y + b.num;
 				printf("small goes into y\n");
-			}
+			}*/
 		}
 
 		if (b.num == 0) 
