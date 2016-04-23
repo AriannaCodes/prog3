@@ -117,7 +117,6 @@ uint64_t rr(const uint64_t array[], bool pp)
 
 	// store partitioning
 	int* part;
-	uint64_t * full;
 
 	// make a copy of original array for modification
 	uint64_t* copy = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
@@ -130,7 +129,6 @@ uint64_t rr(const uint64_t array[], bool pp)
 		if (pp)
 		{
 			part = prepart(array);
-			full = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
 			for (int i = 0; i < SIZE; i++)
 		    {
 		        copy[part[i]] += array[i];
@@ -193,56 +191,95 @@ uint64_t hc(const uint64_t array[], bool pp)
 	// array to store what's in set
 	bool set[SIZE];
 
-	// randomly assign every element of the array
-	for (int i = 0; i < SIZE; i++)
+	// make a copy of original array for modification
+	uint64_t* copy = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+	memcpy(copy, array, SIZE * sizeof(uint64_t));	
+
+	// if we're prepartitioning
+	if (pp)
 	{
-		if (rand() % 2 == 0)
+		int* part = prepart(array);
+		for (int i = 0; i < SIZE; i++)
+	    {
+	        copy[part[i]] += array[i];
+	    }
+	    min = kk(copy);
+	    // iterate
+	    for (unsigned int i = 0; i < ITERS; ++i)
 		{
-			sum = sum + array[i];
-			set[i] = true;
-		}
-		else
-		{
-			sum = sum - array[i];
-			set[i] = false;
+			// randomly gen two places
+			int a = rand() % SIZE;
+			// ensure b != a
+			int b;
+			do {
+				b = rand() % SIZE;
+			} while (part[a] == b);
+			// make a random move
+			part[a] = b;
+			copy[a] = copy[a] - array[a];
+			copy[b] = copy[b] + array[a];
+			// see if it got better
+			sum = kk(copy);
+			if (sum < min)
+			{
+				min = sum;
+			}
 		}
 	}
-
-	min = sum;
-	abs_min = (min < 0) ? (-1 * min) : (min);
-
-	// iterate through neighbours
-	for (unsigned int i = 0; i < ITERS; ++i)
+	// if we're not prepartitioning
+	else
 	{
-		// randomly gen two places
-		int a = rand() % SIZE;
-		// ensure b != a
-		int b;
-		do {
-			b = rand() % SIZE;
-		} while (b == a);
-
-		// swap (with prob 1/2)
-		sum = min;
-		if (rand() % 2 == 0)
+		// assign elements of array
+		for (int i = 0; i < SIZE; i++)
 		{
-			set[a] = !set[a];
-			sum = (set[a]) ? (sum + 2*array[a]) : (sum - 2*array[a]);
-		}
-		if (rand() % 2 == 0)
-		{
-			set[b] = !set[b];
-			sum = (set[b]) ? (sum + 2*array[b]) : (sum - 2*array[b]);
+			if (rand() % 2 == 0)
+			{
+				sum = sum + array[i];
+				set[i] = true;
+			}
+			else
+			{
+				sum = sum - array[i];
+				set[i] = false;
+			}
 		}
 
-		// get our new absolute sum
-		abs_sum = (sum < 0) ? (-1 * sum) : (sum);
+		min = sum;
+		abs_min = (min < 0) ? (-1 * min) : (min);
 
-		// see if we got better
-		if (abs_sum < abs_min)
+		// iterate through neighbours
+		for (unsigned int i = 0; i < ITERS; ++i)
 		{
-			min = sum;
-			abs_min = abs_sum;
+			// randomly gen two places
+			int a = rand() % SIZE;
+			// ensure b != a
+			int b;
+			do {
+				b = rand() % SIZE;
+			} while (b == a);
+
+			// swap (with prob 1/2)
+			sum = min;
+			if (rand() % 2 == 0)
+			{
+				set[a] = !set[a];
+				sum = (set[a]) ? (sum + 2*array[a]) : (sum - 2*array[a]);
+			}
+			if (rand() % 2 == 0)
+			{
+				set[b] = !set[b];
+				sum = (set[b]) ? (sum + 2*array[b]) : (sum - 2*array[b]);
+			}
+
+			// get our new absolute sum
+			abs_sum = (sum < 0) ? (-1 * sum) : (sum);
+
+			// see if we got better
+			if (abs_sum < abs_min)
+			{
+				min = sum;
+				abs_min = abs_sum;
+			}
 		}
 	}
 	return abs_min;
