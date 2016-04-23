@@ -13,5 +13,5 @@ bool* kk_arr(const uint64_t array[]);
 uint64_t kk(const uint64_t array[]);
 uint64_t rr(const uint64_t array[], bool pp);
 uint64_t hc(const uint64_t array[], bool pp);
-uint64_t sa(const uint64_t array[]);
+uint64_t sa(const uint64_t array[], bool pp);
 void getResidue(const uint64_t array[], bool* set);

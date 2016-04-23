@@ -68,11 +68,12 @@ int main(int argc, char * argv[])
 			printf("KK: %llu\n", kk(arr));
 			printf("RR: %llu\n", rr(arr, false));
 			printf("HC: %llu\n", hc(arr, false));
-			printf("SA: %llu\n", sa(arr));
+			printf("SA: %llu\n", sa(arr, false));
 
 			printf("Pre-partitioning!\n");
 			printf("RR: %llu\n", rr(arr, true));
 			printf("HC: %llu\n", hc(arr, true));
+			printf("SA: %llu\n", sa(arr, true));
 
 			free(arr);
 		}
@@ -286,7 +287,7 @@ uint64_t hc(const uint64_t array[], bool pp)
 }
 
 // SIMULATED ANNEALING
-uint64_t sa(const uint64_t array[])
+uint64_t sa(const uint64_t array[], bool pp)
 {
 	assert(array != NULL);
 	int64_t best_min = INT64_MAX;
@@ -297,70 +298,120 @@ uint64_t sa(const uint64_t array[])
 	// array to store what's in set
 	bool set[SIZE];
 
-	// randomly assign every element of the array
-	for (int i = 0; i < SIZE; i++)
+	// make a copy of original array for modification
+	uint64_t* copy = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+	memcpy(copy, array, SIZE * sizeof(uint64_t));	
+
+	// if we're prepartitioning
+	if (pp)
 	{
-		if (rand() % 2 == 0)
+		int* part = prepart(array);
+		for (int i = 0; i < SIZE; i++)
+	    {
+	        copy[part[i]] += array[i];
+	    }
+	    best_min = kk(copy);
+	    // set up the mins
+	    int64_t init_min = best_min;
+	    // iterate
+	    for (unsigned int i = 0; i < ITERS; ++i)
 		{
-			sum = sum + array[i];
-			set[i] = true;
-		}
-		else
-		{
-			sum = sum - array[i];
-			set[i] = false;
+			// randomly gen two places
+			int a = rand() % SIZE;
+			// ensure b != a
+			int b;
+			do {
+				b = rand() % SIZE;
+			} while (part[a] == b);
+			// make a random move
+			part[a] = b;
+			copy[a] = copy[a] - array[a];
+			copy[b] = copy[b] + array[a];
+			// see if it got better
+			sum = kk(copy);
+			if (sum < init_min)
+			{
+				init_min = sum;
+			}
+			// if not, maybe keep it anyway
+			else if (drand48() <= exp(-1 * (sum - init_min)) / t(i))
+			{
+				init_min = sum;
+			}
+			// record best value
+			if (init_min < best_min)
+			{
+				best_min = init_min;
+			}
 		}
 	}
-
-	best_min = sum;
-	best_abs_min = (best_min < 0) ? (-1 * best_min) : (best_min);
-	int64_t init_min = best_min;
-	uint64_t init_abs_min = best_abs_min;
-
-	// iterate through neighbours
-	for (unsigned int i = 0; i < ITERS; ++i)
+	else
 	{
-		// randomly gen two places
-		int a = rand() % SIZE;
-		// ensure b != a
-		int b;
-		do {
-			b = rand() % SIZE;
-		} while (b == a);
-
-		// swap (with prob 1/2)
-		sum = init_min;
-		if (rand() % 2 == 0)
+		// randomly assign every element of the array
+		for (int i = 0; i < SIZE; i++)
 		{
-			set[a] = !set[a];
-			sum = (set[a]) ? (sum + 2*array[a]) : (sum - 2*array[a]);
-		}
-		if (rand() % 2 == 0)
-		{
-			set[b] = !set[b];
-			sum = (set[b]) ? (sum + 2*array[b]) : (sum - 2*array[b]);
+			if (rand() % 2 == 0)
+			{
+				sum = sum + array[i];
+				set[i] = true;
+			}
+			else
+			{
+				sum = sum - array[i];
+				set[i] = false;
+			}
 		}
 
-		// get our new absolute sum
-		abs_sum = (sum < 0) ? (-1 * sum) : (sum);
+		best_min = sum;
+		best_abs_min = (best_min < 0) ? (-1 * best_min) : (best_min);
+		int64_t init_min = best_min;
+		uint64_t init_abs_min = best_abs_min;
 
-		// see if we got better
-		if (abs_sum < init_abs_min)
+		// iterate through neighbours
+		for (unsigned int i = 0; i < ITERS; ++i)
 		{
-			init_min = sum;
-			init_abs_min = abs_sum;
-		}
-		// if not, maybe keep the result anyway
-		else if (drand48() <= exp(-1 * (abs_sum - init_abs_min)) / t(i))
-		{
-			init_min = sum;
-			init_abs_min = abs_sum;
-		}
-		// record the best value
-		if (init_abs_min < best_abs_min)
-		{
-			best_min = init_min;
-			best_abs_min = init_abs_min;
+			// randomly gen two places
+			int a = rand() % SIZE;
+			// ensure b != a
+			int b;
+			do {
+				b = rand() % SIZE;
+			} while (b == a);
+
+			// swap (with prob 1/2)
+			sum = init_min;
+			if (rand() % 2 == 0)
+			{
+				set[a] = !set[a];
+				sum = (set[a]) ? (sum + 2*array[a]) : (sum - 2*array[a]);
+			}
+			if (rand() % 2 == 0)
+			{
+				set[b] = !set[b];
+				sum = (set[b]) ? (sum + 2*array[b]) : (sum - 2*array[b]);
+			}
+
+			// get our new absolute sum
+			abs_sum = (sum < 0) ? (-1 * sum) : (sum);
+
+			// see if we got better
+			if (abs_sum < init_abs_min)
+			{
+				init_min = sum;
+				init_abs_min = abs_sum;
+			}
+			// if not, maybe keep the result anyway
+			else if (drand48() <= exp(-1 * (abs_sum - init_abs_min)) / t(i))
+			{
+				init_min = sum;
+				init_abs_min = abs_sum;
+			}
+			// record the best value
+			if (init_abs_min < best_abs_min)
+			{
+				best_min = init_min;
+				best_abs_min = init_abs_min;
+			}
 		}
 	}
 	return best_abs_min;
