@@ -6,25 +6,8 @@
 
 #define INSTANCES 50
 
-struct Node
-{
-    uint64_t num;
-    int index;
-
-    Node(uint64_t n, int i) : num(n), index(i)
-    {
-    }
-
-    bool operator<(const struct Node& other) const
-    {
-        //Your priority logic goes here
-        return num < other.num;
-    }
-};
-
 int main(int argc, char * argv[])
 {
-	uint64_t * arr;
 	// seed random number generator
 	time_t ti = time(NULL);
 	srand((unsigned) time(&ti));
@@ -33,7 +16,7 @@ int main(int argc, char * argv[])
 	{
 		printf("Inputfile given! Reading in... \n");
 
-		arr = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+		uint64_t * arr = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
 		FILE* file;
 		char* line = NULL;
 		size_t len = 0;
@@ -52,21 +35,19 @@ int main(int argc, char * argv[])
 			i++;
 		}
 		printf("Karmarkar-Karp: %llu\n", kk(arr));
-		getResidue(arr, kk_arr(arr));
 		free(arr);
-
 		fclose(file);
 		printf("----------\n");
 	}
 	else if (argc == 1)
 	{
-		double bkk = 0.0;
-		double brr = 0.0;
-		double bhc = 0.0;
-		double bsa = 0.0;
-		double brrr = 0.0;
-		double bhcr = 0.0;
-		double bsar = 0.0;
+		double res_kk_total = 0.0;
+		double res_rr_total = 0.0;
+		double res_hc_total = 0.0;
+		double res_sa_total = 0.0;
+		double res_rrp_total = 0.0;
+		double res_hcp_total = 0.0;
+		double res_sap_total = 0.0;
 
 		printf("No inputfile given! Constructing random arrays...\n");
 		for (unsigned int instances = 0; instances < INSTANCES; ++instances)
@@ -74,41 +55,40 @@ int main(int argc, char * argv[])
 			// make random array
 			uint64_t * arr = randArray();
 
-			bkk += kk(arr) / INSTANCES;
-			brr += rr(arr, false) / INSTANCES;
-			bhc += hc(arr, false) / INSTANCES;
-			bsa += sa(arr, false) / INSTANCES;
-			brrr += rr(arr, true) / INSTANCES;
-			bhcr += hc(arr, true) / INSTANCES;
-			bsar += sa(arr, true) / INSTANCES;
+			// set totals
+			res_kk_total += kk(arr);
+			res_rr_total += rr(arr, false);
+			res_hc_total += hc(arr, false);
+			res_sa_total += sa(arr, false);
+			res_rrp_total += rr(arr, true);
+			res_hcp_total += hc(arr, true);
+			res_sap_total += sa(arr, true);
+
+			// clean up
 			printf("Round %d done\n", instances);
-
-			printf("KK: %llu\n", kk(arr));
-			printf("RR: %llu\n", rr(arr, false));
-			printf("HC: %llu\n", hc(arr, false));
-			printf("SA: %llu\n", sa(arr, false));
-
-			printf("Pre-partitioning!\n");
-			printf("RR: %llu\n", rr(arr, true));
-			printf("HC: %llu\n", hc(arr, true));
-			printf("SA: %llu\n", sa(arr, true));
-
 			free(arr);
 		}
-		printf("%f\n%f\n%f\n%f\n%f\n%f\n%f\n", bkk, brr, bhc, bsa, brrr, bhcr, bsar);
+
+		// we're done!
+		printf("Karmarkar-Karp: %f\n", res_kk_total / INSTANCES);
+		printf("Repeated random: %f\n", res_rr_total / INSTANCES);
+		printf("Hill-climbing: %f\n", res_hc_total / INSTANCES);
+		printf("Simulated annealing: %f\n", res_sa_total / INSTANCES);
+		printf("Repeated random w/ prepartitioning: %f\n", res_rrp_total / INSTANCES);
+		printf("Hill-climbing w/ prepartitioning: %f\n", res_hcp_total / INSTANCES);
+		printf("Simulated annealing w/ prepartitioning: %f\n", res_sap_total / INSTANCES);
+		printf("----------\n");
 	}
 	else
 	{
 		printf("Invalid input\n");
 		return 0;
 	}
-
 }
 
-
+// karmarkar karp
 uint64_t kk(const uint64_t array[])
 {
-	// priority queue implementation
 	std::priority_queue<uint64_t> q;
 	for (unsigned int i = 0; i < SIZE; ++i)
 	{
@@ -127,89 +107,12 @@ uint64_t kk(const uint64_t array[])
 	}
 }
 
-// Karmarkar-Karp
-bool* kk_arr(const uint64_t array[])
-{
-	// store what's in our set
-	bool* set = (bool *) malloc(SIZE * sizeof(bool));
-	int64_t x = 0;
-	int64_t y = 0;
-
-	// priority queue implementation
-	std::priority_queue<Node> q;
-	for (unsigned int i = 0; i < SIZE; ++i)
-	{
-		q.push(Node(array[i], i));
-	}
-	q.push(Node(0, -1));
-	q.push(Node(0, -1));
-	while (true)
-	{
-		Node a = q.top();
-		q.pop();
-		Node b = q.top();
-		q.pop();
-
-		if (y < x)
-		{
-			if (a.index != -1 && b.index != -1)
-			{
-				set[a.index] = false;
-				y = y + a.num;
-				set[b.index] = true;
-				x = x + b.num;
-			}
-			else if (a.index != -1)
-			{
-				set[a.index] = false;
-				y = y + a.num;
-			}
-			else if (b.index != -1)
-			{
-				set[b.index] = false;
-				y = y + b.num;
-			}
-		}
-		else
-		{
-			// put bigger elt in smaller set
-			if (a.index != -1 && b.index != -1)
-			{
-				set[a.index] = true;
-				x = x + a.num;
-				set[b.index] = false;
-				y = y + b.num;
-			}
-			else if (a.index != -1)
-			{
-				set[a.index] = true;
-				x = x + a.num;
-			}
-			else if (b.index != -1)
-			{
-				set[b.index] = true;
-				x = x + b.num;
-			}
-		}
-
-		if (b.num == 0) 
-	    {
-	    	printf("X: %lli\nY: %lli\nDiff:%lli\n", x, y, x - y);
-	    	return set;
-	    }
-		q.push(Node(a.num - b.num, -1));
-	}
-}
-
 // REPEATED RANDOM
 // if pp = true, repeatedly prepartitions and runs kk on array
 uint64_t rr(const uint64_t array[], bool pp)
 {
-	// declare sums and min
+	// initialize min
 	int64_t min = INT64_MAX;
-
-	// store partitioning
-	int* part;
 
 	// make a copy of original array for modification
 	uint64_t* copy = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
@@ -222,7 +125,7 @@ uint64_t rr(const uint64_t array[], bool pp)
 		if (pp)
 		{
 			memset(copy, 0, SIZE * sizeof(uint64_t));
-			part = prepart(array);
+			int * part = prepart(array);
 			for (int i = 0; i < SIZE; i++)
 		    {
 		        copy[part[i]] += array[i];
@@ -254,25 +157,6 @@ uint64_t rr(const uint64_t array[], bool pp)
 	return min;
 }
 
-void getResidue(const uint64_t array[], bool* set)
-{
-	int64_t sum = 0;
-
-	// randomly assign every element of the array
-	for (int i = 0; i < SIZE; i++)
-	{
-		if (set[i])
-		{
-			sum = sum + array[i];
-		}
-		else
-		{
-			sum = sum - array[i];
-		}
-	}
-	printf("%lli\n", sum);
-}
-
 // HILL-CLIMBING
 // if pp = true, prepartitions, runs kk, then iterates
 uint64_t hc(const uint64_t array[], bool pp)
@@ -280,16 +164,14 @@ uint64_t hc(const uint64_t array[], bool pp)
 	int64_t min = INT64_MAX;
 	int64_t sum = 0;
 
-	// array to store what's in set
-	bool set[SIZE];
-
-	// make a copy of original array for modification
-	uint64_t* copy = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
-
 	// if we're prepartitioning
 	if (pp)
 	{
+		// make a copy of original array for modification
+		uint64_t* copy = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
 		memset(copy, 0, SIZE * sizeof(uint64_t));
+
+		// start prepartitioning
 		int* part = prepart(array);
 		for (int i = 0; i < SIZE; i++)
 	    {
@@ -331,6 +213,7 @@ uint64_t hc(const uint64_t array[], bool pp)
 			{
 				min = sum;
 			}
+
 			// undo changes
 			else
 			{
@@ -338,10 +221,14 @@ uint64_t hc(const uint64_t array[], bool pp)
 			}
 		}
 		free(part);
+		free(copy);
 	}
 	// if we're not prepartitioning
 	else
 	{
+		// array to store what's in the set
+		bool set[SIZE];
+
 		// assign elements of array
 		for (int i = 0; i < SIZE; i++)
 		{
@@ -400,14 +287,12 @@ uint64_t hc(const uint64_t array[], bool pp)
 			}
 		}
 	}
-	free(copy);
 	return min;
 }
 
 // SIMULATED ANNEALING
 uint64_t sa(const uint64_t array[], bool pp)
 {
-	assert(array != NULL);
 	int64_t sum = 0;
 	uint64_t best_min = UINT64_MAX;
 	uint64_t min = UINT64_MAX;
@@ -415,15 +300,12 @@ uint64_t sa(const uint64_t array[], bool pp)
 	// array to store what's in set
 	bool set[SIZE];
 
-	// make a copy of original array for modification
-	uint64_t* copy = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
-	memcpy(copy, array, SIZE * sizeof(uint64_t));	
-
 	// if we're prepartitioning
 	if (pp)
 	{
+		uint64_t * copy = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
 		memset(copy, 0, SIZE * sizeof(uint64_t));
-		int* part = prepart(array);
+		int * part = prepart(array);
 		for (int i = 0; i < SIZE; i++)
 	    {
 	        copy[part[i]] += array[i];
@@ -431,7 +313,7 @@ uint64_t sa(const uint64_t array[], bool pp)
 	    best_min = kk(copy);
 	    min = best_min;
 	    
-	    // iterate
+	    // iterate through neighbors
 	    for (unsigned int i = 0; i < ITERS; ++i)
 		{
 			// randomly gen two places
@@ -476,6 +358,7 @@ uint64_t sa(const uint64_t array[], bool pp)
 				part[a] = prev_part;
 			}
 		}
+		free(copy);
 		free(part);
 	}
 	else
@@ -544,6 +427,5 @@ uint64_t sa(const uint64_t array[], bool pp)
 			}
 		}
 	}
-	free(copy);
 	return best_min;
 }
