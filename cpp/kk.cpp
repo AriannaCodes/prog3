@@ -1,15 +1,17 @@
 // kk.cpp -- Abby Lyons & Arianna Benson
 
+#include <list>
 #include "helpers.h"
 #include "kk.h"
+
+#define INSTANCES 50
 
 struct Node
 {
     uint64_t num;
     int index;
 
-    Node(uint64_t n, int i) 
-    : num(n), index(i)
+    Node(uint64_t n, int i) : num(n), index(i)
     {
     }
 
@@ -22,19 +24,16 @@ struct Node
 
 int main(int argc, char * argv[])
 {
+	uint64_t * arr;
 	// seed random number generator
 	time_t ti = time(NULL);
 	srand((unsigned) time(&ti));
 
-	// create arrays
-	uint64_t* arr;
-
 	if (argc == 2)
 	{
-		arr = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
-		
 		printf("Inputfile given! Reading in... \n");
 
+		arr = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
 		FILE* file;
 		char* line = NULL;
 		size_t len = 0;
@@ -57,29 +56,46 @@ int main(int argc, char * argv[])
 		free(arr);
 
 		fclose(file);
+		printf("----------\n");
 	}
 	else if (argc == 1)
 	{
+		double bkk = 0.0;
+		double brr = 0.0;
+		double bhc = 0.0;
+		double bsa = 0.0;
+		double brrr = 0.0;
+		double bhcr = 0.0;
+		double bsar = 0.0;
+
 		printf("No inputfile given! Constructing random arrays...\n");
-		for (unsigned int instances = 0; instances < 1; ++instances)
+		for (unsigned int instances = 0; instances < INSTANCES; ++instances)
 		{
 			// make random array
-			arr = randArray();
+			uint64_t * arr = randArray();
+
+			bkk += kk(arr) / INSTANCES;
+			brr += rr(arr, false) / INSTANCES;
+			bhc += hc(arr, false) / INSTANCES;
+			bsa += sa(arr, false) / INSTANCES;
+			brrr += rr(arr, true) / INSTANCES;
+			bhcr += hc(arr, true) / INSTANCES;
+			bsar += sa(arr, true) / INSTANCES;
+			printf("Round %d done\n", instances);
 
 			printf("KK: %llu\n", kk(arr));
 			printf("RR: %llu\n", rr(arr, false));
 			printf("HC: %llu\n", hc(arr, false));
-			printf("SA: %llu\n", sa(arr));
-
-			getResidue(arr, kk_arr(arr));
-			return 0;
+			printf("SA: %llu\n", sa(arr, false));
 
 			printf("Pre-partitioning!\n");
 			printf("RR: %llu\n", rr(arr, true));
 			printf("HC: %llu\n", hc(arr, true));
+			printf("SA: %llu\n", sa(arr, true));
 
 			free(arr);
 		}
+		printf("%f\n%f\n%f\n%f\n%f\n%f\n%f\n", bkk, brr, bhc, bsa, brrr, bhcr, bsar);
 	}
 	else
 	{
@@ -88,6 +104,7 @@ int main(int argc, char * argv[])
 	}
 
 }
+
 
 uint64_t kk(const uint64_t array[])
 {
@@ -173,15 +190,6 @@ bool* kk_arr(const uint64_t array[])
 				set[b.index] = true;
 				x = x + b.num;
 			}
-
-			/*
-			// put smaller elt in bigger set
-			if (b.index != -1)
-			{
-				set[b.index] = true;
-				y = y + b.num;
-				printf("small goes into y\n");
-			}*/
 		}
 
 		if (b.num == 0) 
@@ -198,31 +206,29 @@ bool* kk_arr(const uint64_t array[])
 uint64_t rr(const uint64_t array[], bool pp)
 {
 	// declare sums and min
-	uint64_t min = UINT64_MAX;
-	int64_t sum = 0;
-	uint64_t abs_sum;
+	int64_t min = INT64_MAX;
 
 	// store partitioning
 	int* part;
-	uint64_t * full;
 
 	// make a copy of original array for modification
 	uint64_t* copy = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
-	memcpy(copy, array, SIZE * sizeof(uint64_t));	
 	
 	// get random assignment
 	for (unsigned int i = 0; i < ITERS; ++i)
 	{
+		int64_t sum = 0;
 		// if pp, then preparition our array
 		if (pp)
 		{
+			memset(copy, 0, SIZE * sizeof(uint64_t));
 			part = prepart(array);
-			full = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
 			for (int i = 0; i < SIZE; i++)
 		    {
 		        copy[part[i]] += array[i];
 		    }
-		    abs_sum = kk(copy);
+		    sum = kk(copy);
+		    free(part);
 		}
 		else
 		{
@@ -231,18 +237,18 @@ uint64_t rr(const uint64_t array[], bool pp)
 			{
 				if (rand() % 2 == 0)
 				{
-					sum += copy[i];
+					sum += array[i];
 				}
 				else
 				{
-					sum -= copy[i];
+					sum -= array[i];
 				}
 			}
-			abs_sum = llabs(sum);
+			sum = llabs(sum);
 		}
-		if (abs_sum < min)
+		if (sum < min)
 		{
-			min = abs_sum;
+			min = sum;
 		}
 	}
 	return min;
@@ -264,7 +270,6 @@ void getResidue(const uint64_t array[], bool* set)
 			sum = sum - array[i];
 		}
 	}
-
 	printf("%lli\n", sum);
 }
 
@@ -273,145 +278,272 @@ void getResidue(const uint64_t array[], bool* set)
 uint64_t hc(const uint64_t array[], bool pp)
 {
 	int64_t min = INT64_MAX;
-	uint64_t abs_min = INT64_MAX;
 	int64_t sum = 0;
-	uint64_t abs_sum = 0;
 
 	// array to store what's in set
 	bool set[SIZE];
 
-	// randomly assign every element of the array
-	for (int i = 0; i < SIZE; i++)
+	// make a copy of original array for modification
+	uint64_t* copy = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+
+	// if we're prepartitioning
+	if (pp)
 	{
-		if (rand() % 2 == 0)
+		memset(copy, 0, SIZE * sizeof(uint64_t));
+		int* part = prepart(array);
+		for (int i = 0; i < SIZE; i++)
+	    {
+	        copy[part[i]] += array[i];
+	    }
+	    min = kk(copy);
+	    
+	    // iterate
+	    for (unsigned int i = 0; i < ITERS; ++i)
 		{
-			sum = sum + array[i];
-			set[i] = true;
+			// randomly gen two places
+			int a = rand() % SIZE;
+			
+			int prev_part = -1;
+			
+			// ensure b != a
+			int b;
+			while(true)
+			{
+				b = rand() % SIZE;
+				if (part[a] != b)
+				{
+					prev_part = part[a];
+					part[a] = b;
+					break;
+				}
+			}
+			
+			memset(copy, 0, SIZE * sizeof(uint64_t));
+			for (int i = 0; i < SIZE; i++)
+		    {
+		        copy[part[i]] += array[i];
+		    }
+		    sum = kk(copy);
+			
+			// see if it got better
+			sum = kk(copy);
+			if (sum < min)
+			{
+				min = sum;
+			}
+			// undo changes
+			else
+			{
+				part[a] = prev_part;
+			}
 		}
-		else
-		{
-			sum = sum - array[i];
-			set[i] = false;
-		}
+		free(part);
 	}
-
-	min = sum;
-	abs_min = (min < 0) ? (-1 * min) : (min);
-
-	// iterate through neighbours
-	for (unsigned int i = 0; i < ITERS; ++i)
+	// if we're not prepartitioning
+	else
 	{
-		// randomly gen two places
-		int a = rand() % SIZE;
-		// ensure b != a
-		int b;
-		do {
-			b = rand() % SIZE;
-		} while (b == a);
-
-		// swap (with prob 1/2)
-		sum = min;
-		if (rand() % 2 == 0)
+		// assign elements of array
+		for (int i = 0; i < SIZE; i++)
 		{
+			if (rand() % 2 == 0)
+			{
+				sum = sum + array[i];
+				set[i] = true;
+			}
+			else
+			{
+				sum = sum - array[i];
+				set[i] = false;
+			}
+		}
+		min = (sum < 0) ? (-1 * sum) : (sum);
+
+		// iterate through neighbours
+		for (unsigned int i = 0; i < ITERS; ++i)
+		{
+			// randomly gen two places
+			int a = rand() % SIZE;
+			// ensure b != a
+			int b;
+			do {
+				b = rand() % SIZE;
+			} while (b == a);
+
+			// swap (with prob 1/2)
 			set[a] = !set[a];
-			sum = (set[a]) ? (sum + 2*array[a]) : (sum - 2*array[a]);
-		}
-		if (rand() % 2 == 0)
-		{
-			set[b] = !set[b];
-			sum = (set[b]) ? (sum + 2*array[b]) : (sum - 2*array[b]);
-		}
+			bool swapped = false;
+			if (rand() % 2 == 0)
+			{
+				swapped = true;
+				set[b] = !set[b];
+			}
+			
+			// calculate new residue
+			sum = 0;
+			for (int j = 0; j < SIZE; ++j)
+			{
+				set[j] ? (sum += array[j]) : (sum -= array[j]);
+			}
+			sum = (sum < 0) ? (-1 * sum) : (sum);
 
-		// get our new absolute sum
-		abs_sum = (sum < 0) ? (-1 * sum) : (sum);
-
-		// see if we got better
-		if (abs_sum < abs_min)
-		{
-			min = sum;
-			abs_min = abs_sum;
+			// see if we got better
+			if (sum < min)
+			{
+				min = sum;
+			}
+			
+			// if not better, go to the previous solution
+			else
+			{
+				set[a] = !set[a];
+				if (swapped)  set[b] = !set[b];
+			}
 		}
 	}
-	return abs_min;
+	free(copy);
+	return min;
 }
 
 // SIMULATED ANNEALING
-uint64_t sa(const uint64_t array[])
+uint64_t sa(const uint64_t array[], bool pp)
 {
 	assert(array != NULL);
-	int64_t best_min = INT64_MAX;
-	uint64_t best_abs_min = INT64_MAX;
 	int64_t sum = 0;
-	uint64_t abs_sum = 0;
+	uint64_t best_min = UINT64_MAX;
+	uint64_t min = UINT64_MAX;
 
 	// array to store what's in set
 	bool set[SIZE];
 
-	// randomly assign every element of the array
-	for (int i = 0; i < SIZE; i++)
+	// make a copy of original array for modification
+	uint64_t* copy = (uint64_t *) malloc(SIZE * sizeof(uint64_t));
+	memcpy(copy, array, SIZE * sizeof(uint64_t));	
+
+	// if we're prepartitioning
+	if (pp)
 	{
-		if (rand() % 2 == 0)
+		memset(copy, 0, SIZE * sizeof(uint64_t));
+		int* part = prepart(array);
+		for (int i = 0; i < SIZE; i++)
+	    {
+	        copy[part[i]] += array[i];
+	    }
+	    best_min = kk(copy);
+	    min = best_min;
+	    
+	    // iterate
+	    for (unsigned int i = 0; i < ITERS; ++i)
 		{
-			sum = sum + array[i];
-			set[i] = true;
+			// randomly gen two places
+			int a = rand() % SIZE;
+			
+			int prev_part = -1;
+			
+			// ensure b != a
+			int b;
+			while(true)
+			{
+				b = rand() % SIZE;
+				if (part[a] != b)
+				{
+					prev_part = part[a];
+					part[a] = b;
+					break;
+				}
+			}
+			
+			memset(copy, 0, SIZE * sizeof(uint64_t));
+			for (int i = 0; i < SIZE; i++)
+		    {
+		        copy[part[i]] += array[i];
+		    }
+		    sum = kk(copy);
+		    
+		    // see if we got better
+			if (sum < best_min)
+			{
+				best_min = sum;
+				min = sum;
+			}
+			// if not, maybe keep the result anyway
+			else if (drand48() <= exp(-1 * (sum - min)) / t(i))
+			{
+				min = sum;
+			}
+			// if all else fails, undo calculations
+			else
+			{
+				part[a] = prev_part;
+			}
 		}
-		else
-		{
-			sum = sum - array[i];
-			set[i] = false;
-		}
+		free(part);
 	}
-
-	best_min = sum;
-	best_abs_min = (best_min < 0) ? (-1 * best_min) : (best_min);
-	int64_t init_min = best_min;
-	uint64_t init_abs_min = best_abs_min;
-
-	// iterate through neighbours
-	for (unsigned int i = 0; i < ITERS; ++i)
+	else
 	{
-		// randomly gen two places
-		int a = rand() % SIZE;
-		// ensure b != a
-		int b;
-		do {
-			b = rand() % SIZE;
-		} while (b == a);
-
-		// swap (with prob 1/2)
-		sum = init_min;
-		if (rand() % 2 == 0)
+		// assign elements of array
+		for (int i = 0; i < SIZE; i++)
 		{
+			if (rand() % 2 == 0)
+			{
+				sum = sum + array[i];
+				set[i] = true;
+			}
+			else
+			{
+				sum = sum - array[i];
+				set[i] = false;
+			}
+		}
+		best_min = (sum < 0) ? (-1 * sum) : (sum);
+		min = best_min;
+
+		// iterate through neighbours
+		for (unsigned int i = 0; i < ITERS; ++i)
+		{
+			// randomly gen two places
+			int a = rand() % SIZE;
+			// ensure b != a
+			int b;
+			do {
+				b = rand() % SIZE;
+			} while (b == a);
+
+			// swap (with prob 1/2)
 			set[a] = !set[a];
-			sum = (set[a]) ? (sum + 2*array[a]) : (sum - 2*array[a]);
-		}
-		if (rand() % 2 == 0)
-		{
-			set[b] = !set[b];
-			sum = (set[b]) ? (sum + 2*array[b]) : (sum - 2*array[b]);
-		}
+			bool swapped = false;
+			if (rand() % 2 == 0)
+			{
+				swapped = true;
+				set[b] = !set[b];
+			}
+			
+			// calculate new residue
+			sum = 0;
+			for (int j = 0; j < SIZE; ++j)
+			{
+				set[j] ? (sum += array[j]) : (sum -= array[j]);
+			}
+			sum = (sum < 0) ? (-1 * sum) : (sum);
 
-		// get our new absolute sum
-		abs_sum = (sum < 0) ? (-1 * sum) : (sum);
-
-		// see if we got better
-		if (abs_sum < init_abs_min)
-		{
-			init_min = sum;
-			init_abs_min = abs_sum;
-		}
-		// if not, maybe keep the result anyway
-		else if (drand48() <= exp(-1 * (abs_sum - init_abs_min)) / t(i))
-		{
-			init_min = sum;
-			init_abs_min = abs_sum;
-		}
-		// record the best value
-		if (init_abs_min < best_abs_min)
-		{
-			best_min = init_min;
-			best_abs_min = init_abs_min;
+			// see if we got better
+			if (sum < best_min)
+			{
+				best_min = sum;
+				min = sum;
+			}
+			// if not, maybe keep the result anyway
+			else if (drand48() <= exp(-1 * (sum - min)) / t(i))
+			{
+				min = sum;
+			}
+			// if all else fails, undo calculations
+			else
+			{
+				set[a] = !set[a];
+				if (swapped)  set[b] = !set[b];
+			}
 		}
 	}
-	return best_abs_min;
+	free(copy);
+	return best_min;
 }

@@ -1,6 +1,7 @@
 // helpers.cpp
 
 #include "helpers.h"
+#include <list>
 
 // compares two values
 int compare(void const *a, void const *b)
@@ -19,9 +20,11 @@ int compare(void const *a, void const *b)
 //        how-to-generate-large-random-numbers-c)
 uint64_t gen() 
 {
-	uint64_t num;
-	num = rand();
-	return (((num << 32) + rand()) % MAX) + 1;
+    uint64_t num;
+    int a = (rand() % 2 == 0) ? 1 : 0;
+    int b = (rand() % 2 == 0) ? 1 : 0;
+    num = 2 * rand() + a;
+    return (((num << 32) + 2*rand() + b) % MAX) + 1;
 }
 
 int* prepart(const uint64_t arr[])
@@ -48,4 +51,34 @@ uint64_t* randArray()
 uint64_t t(unsigned int iter)
 {
     return (uint64_t) pow(10, 10) * pow(0.8, (int) iter / 300);
+}
+
+
+// performs depth first search to get partitioning
+int dfs(bool* set, std::list<int> *edges, bool* visited,
+         int j, bool cur, int count)
+{
+    if (!visited[j])
+    {
+      // increment total count
+      count++;
+
+      // set our current elt to true
+      set[j] = cur;
+      visited[j] = true;
+
+      // look through links
+      std::list<int>::iterator i;
+      std::list<int> e = edges[j];
+      for (i = e.begin(); i != e.end(); ++i)
+      {
+          if (!visited[*i])
+          {
+              count += dfs(set, edges, visited, *i, !cur, 0);
+          }
+      }
+    }
+    printf("visited %i\n", j);
+    printf("count %i\n", count);
+    return count;
 }

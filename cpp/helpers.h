@@ -6,6 +6,8 @@
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <list>
 
 int compare(void const*a, void const*b);
 uint64_t gen();
